@@ -302,14 +302,13 @@ def tab_clientes(clientes):
         print(f"{clave:^8}{datos[0]: <41}{datos[1]: <41}{datos[2]}")
     print("=" * 100)
 
-def csv_test(clientes):
+def export_csv_clientes(clientes):
     with open("Clientes_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_clientes:
         grabador = csv.writer(archivocsv_clientes)
         grabador.writerow(("Clave", "Apellidos", "Nombres", "Teléfono"))
         grabador.writerows([(clave, datos[0], datos[1], datos[2]) for clave, datos in clientes.items()])
     print("Datos exportados con éxito en Clientes_bicicletas.csv")
-    
-    
+  
 def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
     clientes = {}
     try:
@@ -423,11 +422,11 @@ def exportar_clientes():
             try:
                 export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4. Salir al submenú\n"))
                 if export_opcion == 1:
-                    csv_test(clientes)
+                    export_csv_clientes(clientes)
                 elif export_opcion == 2:
                     export_excel_clientes(clientes)
                 elif export_opcion == 3:
-                    csv_test(clientes)
+                    export_csv_clientes(clientes)
                     export_excel_clientes(clientes)
                 elif export_opcion == 4:
                     break
