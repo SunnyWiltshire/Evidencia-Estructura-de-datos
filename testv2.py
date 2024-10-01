@@ -574,8 +574,8 @@ def prestamos_por_periodo():
         
 def menu_export():
   opciones_report()
-
-
+  
+  
 # Inicio del programa
 clientes = cargar_clientes_csv()
 unidades = {}
