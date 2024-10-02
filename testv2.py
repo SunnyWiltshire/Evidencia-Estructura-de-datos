@@ -2,6 +2,9 @@ import csv
 from datetime import datetime, timedelta
 import openpyxl
 from openpyxl.styles import Font 
+unidades = {}
+clientes = {}
+prestamos = {}
 
 #funcion que despliega el menu principal
 def menu_completo():
@@ -31,7 +34,7 @@ def menu_completo():
                     print("Saliendo del sistema...\n")
                     break
                 elif confirmacion == "N":
-                    menu_completo()
+                    return
                 else:
                     print("Opción invalida, ingrese los valores de 'S' o 'N'.")
             else:
@@ -57,7 +60,7 @@ def menu_registro():
             elif opcion == 2:
                 registro_Cliente()
             elif opcion == 3:
-                return False
+                break
             else:
                 print("Opción invalida, intentalo de nuevo.")
         except ValueError:
@@ -98,10 +101,10 @@ def registro_Unidad():
                     else:
                         print("Por favor, ingrese un valor valido (20, 26 o 29).")
                         if cancelar():
-                            return
+                            break
                 except ValueError:
                     if cancelar():
-                        return
+                        break
         elif opcion == "N":
             # Regresar al menú registro si elige 'N'
             return False
@@ -152,8 +155,6 @@ def registro_Cliente():
             # Salir del bucle después de exportar
             break
         elif opcion == "N":
-            # Regresar al menú de registro si elige 'N'
-            menu_registro()
             break  # Salir del bucle para regresar al menú
         else:
             print("Opción inválida. Debes ingresar 'S' o 'N'.")
@@ -187,6 +188,7 @@ def registrar_prestamo():
                     except ValueError:
                         if cancelar():
                             return
+                    
 
                 # Captura de la clave del cliente
                 while True:
@@ -215,28 +217,50 @@ def registrar_prestamo():
                             while True:
                                 fecha_a_elegir = input("Indica la fecha del préstamo (MM/DD/AAAA): ")
                                 try:
-                                    fecha_prestamo = datetime.datetime.strptime(fecha_a_elegir, "%m/%d/%Y").date()
+                                    fecha_prestamo = datetime.strptime(fecha_a_elegir, "%m/%d/%Y").date()
                                     if fecha_prestamo >= fecha_actual:
                                         break
                                     else:
-                                        print("La fecha no puede ser anterior al día de hoy.")
+                                        print("La fecha no puede ser anterior a la actual.")
                                 except ValueError:
                                     print("Formato de fecha incorrecto, intenta de nuevo.")
                             break
                         else:
                             print("Opción inválida, intenta de nuevo.")
+                            if cancelar():
+                                return
                     except ValueError:
                         print("Entrada inválida, elige 1 o 2.")
-
+                        if cancelar():
+                            return
+                # Cantidad de días del prestamo
+                while True:
+                    Cantidad_de_dias = input("¿Cuantos dias de prestamo solicitas?: ")
+                    try:
+                        Cantidad_de_dias = int(Cantidad_de_dias)
+                        if Cantidad_de_dias > 0:
+                            fecha_de_retorno = fecha_prestamo + timedelta(days=Cantidad_de_dias)
+                            print(f"La fecha en la que se debe de regresar la unidad es el: {fecha_de_retorno.strftime('%d/%m/%Y')}")
+                            break
+                        else:
+                            print("La cantidad de dias debe ser mayor a 0.")
+                            if cancelar():
+                                return
+                    except ValueError:
+                        if cancelar():
+                            return
+                        
                 # Registro del préstamo
                 prestamos[folio] = {
                     'Clave_cliente': Clave_cliente,
                     'Clave_unidad': Clave_unidad,
                     'Fecha_prestamo': fecha_prestamo.strftime("%m/%d/%Y"),
-                    'Fecha_retorno': None  # Se completará cuando se registre el retorno
+                    'Fecha_retorno': fecha_de_retorno.strftime('%d/%m/%Y'),
+                    "Retorno": False
                 }
 
                 print(f"Préstamo registrado exitosamente. Folio: {folio}, Cliente: {Clave_cliente}, Unidad: {Clave_unidad}, Fecha de Préstamo: {fecha_prestamo}")
+                break
 
             elif opcion == "N":
                 # Regresar al menú si elige 'N'
@@ -247,29 +271,28 @@ def registrar_prestamo():
 #Función que despliega menú para hacer el retorno de la unidad (Carlos)
 def menu_retorno():
     if prestamos:
-        opcion = input("¿Deseas retornar una unidad? (S/N): ").upper()
-        if opcion == "S":
-            while True:
-                numdefolio = input("\nIngrese el número de folio de su préstamo: \n")
-                try:
-                    numdefolio = int(numdefolio)
-                    if numdefolio in prestamos:
-                        today = datetime.now().date()
-                        prestamos[numdefolio]["Retornado"] = True  #v2
-                        print("Retornó su unidad exitosamente el día", today.strftime('%m/%d/%Y'), "\n")
-                        break
-                    else:
-                        print("El número de folio no existe. Por favor, inténtalo de nuevo.")
-                except ValueError:
-                    print("Por favor, ingrese un número entero.")
-        elif opcion == "N":
-            # Regresar al menú completo si elige 'N'
-            return False
-        else:
-            print("Opción inválida. Debes ingresar 'S' o 'N'.")
-            registro_Unidad()
+      print("\n--- SUBMENÚ RETORNO ---")
+      while True:
+          opcion = input("¿Deseas retornar una unidad? \n 1. Si \n 2. No, volver al menu principal \n Elige una opción: \n")
+
+          if opcion == "1":
+              while True:
+                  numdefolio = input("\nIngrese el número de folio de su préstamo: \n")
+                  try:
+                      numdefolio = int(numdefolio)
+                      if numdefolio in prestamos:
+                          today = datetime.now().date()
+                          prestamos[numdefolio]["Retorno"] = True  #v2
+                          print("Retornó su unidad exitosamente el día", today.strftime('%d/%m/%Y'), "\n")
+                          break
+                      else:
+                          print("El número de folio no existe. Por favor, inténtalo de nuevo.")
+                  except ValueError:
+                      print("Por favor, ingrese un número entero.")
+          elif opcion == "2":
+              break
     else:
-        print("No hay ningún prestamo realizado.")
+      print("No hay ningún prestamo realizado.")
 
 ## JESÚS        
 def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
@@ -282,6 +305,12 @@ def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
     hoja["B1"].value = "Apellidos"
     hoja["C1"].value = "Nombres"
     hoja["D1"].value = "Teléfono"
+    
+    hoja["A1"].font = Font(bold=True)
+    hoja["B1"].font = Font(bold=True)
+    hoja["C1"].font = Font(bold=True)
+    hoja["D1"].font = Font(bold=True)
+    hoja["E1"].font = Font(bold=True)
 
     i = 2
 
@@ -324,52 +353,52 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
 
 def reporte_prestamos_por_retornar(prestamos):
     if prestamos:
-        try:
-            print("\n--- REPORTES DE PRÉSTAMOS POR RETORNAR ---")
-            fecha_inicial = input("Ingrese la fecha inicial (MM/DD/AAAA): ")
-            fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
-            fecha_final = input("Ingrese la fecha final (MM/DD/AAAA): ")
-            fecha_final = datetime.strptime(fecha_final, "%m/%d/%Y").date() 
+        while True:
+            try:
+                fecha_inicial = input("Ingresa la fecha inicial (dd/mm/aaaa): ")
+                fecha_inicial = datetime.strptime(fecha_inicial, "%d/%m/%Y").date()
+                break
+            except ValueError:
+                print("Formato de fecha incorrecto, intenta de nuevo.")
+        
+        while True:
+            try:
+                fecha_final = input("Ingresa la fecha final (dd/mm/aaaa): ")
+                fecha_final = datetime.strptime(fecha_final, "%d/%m/%Y").date()
+                if fecha_final >= fecha_inicial:
+                    break
+                else:
+                    print("La fecha final debe ser posterior o igual a la fecha inicial.")
+            except ValueError:
+                print("Formato de fecha incorrecto, intenta de nuevo.")
+                
+        print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
+        print("=" * 80)
 
-            if fecha_final < fecha_inicial:
-                print("La fecha final no puede ser anterior a la fecha inicial.")
-                return
-            
-            print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
-            print("=" * 80)
+        for folio, datos in prestamos.items():
+            if not datos["Retorno"]:
+                fecha_prestamo = datetime.strptime(datos["Fecha_prestamo"], "%d/%m/%Y").date()
+                fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%d/%m/%Y").date()
 
-            prestamos_mostrados = False
-            for folio, datos in prestamos.items():
-                fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
-                if fecha_inicial <= fecha_prestamo <= fecha_final:
+                if fecha_inicial <= fecha_retorno <= fecha_final:
                     print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
-                    prestamos_mostrados = True
 
-            if not prestamos_mostrados:
-                print("No se encontraron préstamos en el rango de fechas especificado.")
+        print("=" * 80)
 
-            print("=" * 80)
-
-            # Opciones de exportación
-            export_opcion = input("Elige una opción de exportación:\n1. CSV\n2. Excel\n3. Ambos\n")
-            if export_opcion == '1':
-                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            elif export_opcion == '2':
-                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            elif export_opcion == '3':
-                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            else:
-                print("Elige una opción válida (1, 2 o 3).")
-
-        except ValueError as e:
-            print(f"Error en el formato de la fecha: {e}")
-        except KeyError as e:
-            print(f"Error con los datos: {e}")
+        export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n"))
+        if export_opcion == 1:
+            export_csv_prestamos_retornar(prestamos, fecha_inicial, fecha_final)
+        elif export_opcion == 2:
+            export_excel_prestamos_retornar(prestamos, fecha_inicial, fecha_final)
+        elif export_opcion == 3:
+            export_csv_prestamos_retornar(prestamos, fecha_inicial, fecha_final)
+            export_excel_prestamos_retornar(prestamos, fecha_inicial, fecha_final)
+        else:
+            print("Elige una opción válida (1, 2 o 3).")
     else:
         print("No se encontró ningún préstamo.")
 
-def export_excel_prestamos_retornar(prestamos, fecha_inicial, fecha_final, name_excel="Prestamos_por_retornar.xlsx"):
+def export_excel_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, name_excel="Prestamos_por_retornar.xlsx"):
     libro = openpyxl.Workbook()
 
     hoja = libro.active
@@ -380,12 +409,18 @@ def export_excel_prestamos_retornar(prestamos, fecha_inicial, fecha_final, name_
     hoja["C1"].value = "Clave del cliente"
     hoja["D1"].value = "Fecha prestamo"
     hoja["E1"].value = "Fecha de retorno"
+    
+    hoja["A1"].font = Font(bold=True)
+    hoja["B1"].font = Font(bold=True)
+    hoja["C1"].font = Font(bold=True)
+    hoja["D1"].font = Font(bold=True)
+    hoja["E1"].font = Font(bold=True)
 
     i = 2
     for folio, datos in prestamos.items():
-        if not datos["Retornado"]:
+        if not datos["Retorno"]:
             fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date()
-            if fecha_inicial <= fecha_retorno <= fecha_final:
+            if fecha_prestamo <= fecha_retorno <= fecha_de_retorno:
                 hoja.cell(row=i, column=1).value = folio
                 hoja.cell(row=i, column=2).value = datos["Clave_unidad"]
                 hoja.cell(row=i, column=3).value = datos["Clave_cliente"]
@@ -396,7 +431,7 @@ def export_excel_prestamos_retornar(prestamos, fecha_inicial, fecha_final, name_
     libro.save(name_excel)
     print(f"Datos exportados con éxito en {name_excel}")
 
-def export_csv_prestamos_retornar(prestamos, fecha_inicial, fecha_final, nombre_csv="Prestamos_por_retornar.csv"):
+def export_csv_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, nombre_csv="Prestamos_por_retornar.csv"):
     with open(nombre_csv, "w", encoding="latin1", newline="") as archivo_csv:
         grabador = csv.writer(archivo_csv)
 
@@ -406,7 +441,7 @@ def export_csv_prestamos_retornar(prestamos, fecha_inicial, fecha_final, nombre_
         prestamos_filtrados = [
             (folio, datos["Clave_unidad"], datos["Clave_cliente"], datos["Fecha_prestamo"], datos["Fecha_retorno"])
             for folio, datos in prestamos.items()
-            if not datos["Retornado"] and fecha_inicial <= datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date() <= fecha_final
+            if not datos["Retorno"] and fecha_prestamo <= datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date() <= fecha_de_retorno
         ]
 
         if prestamos_filtrados:
@@ -464,7 +499,7 @@ def opciones_report():
     except Exception as error_name:
         print("Ha ocurrido un error")
 
-def export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final, name_excel="Prestamos_por_periodo.xlsx"):
+def export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno, name_excel="Prestamos_por_periodo.xlsx"):
     libro = openpyxl.Workbook()
     hoja = libro.active
     hoja.title = "Prestamos"
@@ -474,6 +509,12 @@ def export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final, na
     hoja["C1"].value = "Clave del cliente"
     hoja["D1"].value = "Fecha préstamo"
     hoja["E1"].value = "Fecha de retorno"
+    
+    hoja["A1"].font = Font(bold=True)
+    hoja["B1"].font = Font(bold=True)
+    hoja["C1"].font = Font(bold=True)
+    hoja["D1"].font = Font(bold=True)
+    hoja["E1"].font = Font(bold=True)
 
     # Poner negrita en los encabezados (fila 1)
     hoja["A1"].font = Font(bold=True)
@@ -485,7 +526,7 @@ def export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final, na
     i = 2  # Iniciar en la fila 2 porque la fila 1 son los encabezados
     for folio, datos in prestamos.items():
         fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
-        if fecha_inicial <= fecha_prestamo <= fecha_final:
+        if fecha_prestamo <= fecha_prestamo <= fecha_de_retorno:
             # Asignar los valores a las celdas
             hoja.cell(row=i, column=1).value = folio
             hoja.cell(row=i, column=2).value = datos["Clave_unidad"]
@@ -507,7 +548,7 @@ def export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final, na
     
     print(f"Datos exportados con éxito en {name_excel}")
     
-def export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final, nombre_csv="Prestamos_por_periodo.csv"):
+def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno, nombre_csv="Prestamos_por_periodo.csv"):
     with open(nombre_csv, "w", encoding="latin1", newline="") as archivo_csv:
         grabador = csv.writer(archivo_csv)
         grabador.writerow(("Folio", "Clave de la unidad", "Clave del cliente", "Fecha préstamo", "Fecha de retorno"))
@@ -515,7 +556,7 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final, nomb
         prestamos_filtrados = [
             (folio, datos["Clave_unidad"], datos["Clave_cliente"], datos["Fecha_prestamo"], datos["Fecha_retorno"])
             for folio, datos in prestamos.items()
-            if fecha_inicial <= datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date() <= fecha_final
+            if fecha_prestamo <= datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date() <= fecha_de_retorno
         ]
 
         if prestamos_filtrados:
@@ -527,18 +568,18 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final, nomb
 def prestamos_por_periodo():
     if prestamos:
         while True:
-            fecha_inicial = input("Indica la fecha inicial del período (MM/DD/AAAA): ")
+            fecha_prestamo = input("Indica la fecha inicial del período (MM/DD/AAAA): ")
             try:
-                fecha_inicial = datetime.datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
+                fecha_prestamo = datetime.datetime.strptime(fecha_prestamo, "%m/%d/%Y").date()
                 break
             except ValueError:
                 print("Formato de fecha incorrecto, intenta de nuevo.")
 
         while True:
-            fecha_final = input("Indica la fecha final del período (MM/DD/AAAA): ")
+            fecha_de_retorno = input("Indica la fecha final del período (MM/DD/AAAA): ")
             try:
-                fecha_final = datetime.datetime.strptime(fecha_final, "%m/%d/%Y").date()
-                if fecha_final >= fecha_inicial:
+                fecha_de_retorno = datetime.datetime.strptime(fecha_de_retorno, "%m/%d/%Y").date()
+                if fecha_de_retorno >= fecha_prestamo:
                     break
                 else:
                     print("La fecha final debe ser posterior o igual a la fecha inicial.")
@@ -551,20 +592,22 @@ def prestamos_por_periodo():
 
         for folio, datos in prestamos.items():
             fecha_prestamo = datetime.datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
-            if fecha_inicial <= fecha_prestamo <= fecha_final:
+            if fecha_prestamo <= fecha_prestamo <= fecha_de_retorno:
                 print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
 
         print("=" * 80)
 
         # Opciones de exportación
-        export_opcion = input("Elige una opción de exportación:\n1. CSV\n2. Excel\n3. Ambos\n")
+        export_opcion = input("Elige una opción de exportación:\n1. CSV\n2. Excel\n3. Ambos\n 4. No deseo exportar.")
         if export_opcion == "1":
-            export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno)
         elif export_opcion == "2":
-            export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno)
         elif export_opcion == "3":
-            export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno)
+            export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno)
+        elif export_opcion == "4":
+            return False
         else:
             print("Elige una opción válida (1, 2 o 3).")
     else:
@@ -577,8 +620,5 @@ def menu_export():
   
 # Inicio del programa
 clientes = cargar_clientes_csv()
-unidades = {}
-clientes = {}
-prestamos = {}
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
 menu_completo()
