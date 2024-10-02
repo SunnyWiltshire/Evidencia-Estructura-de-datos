@@ -569,52 +569,47 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
 
 def prestamos_por_periodo():
     if prestamos:
-        while True:
-            fecha_prestamo = input("Indica la fecha inicial del período (MM/DD/AAAA): ")
-            try:
-                fecha_prestamo = datetime.datetime.strptime(fecha_prestamo, "%m/%d/%Y").date()
-                break
-            except ValueError:
-                print("Formato de fecha incorrecto, intenta de nuevo.")
-
-        while True:
-            fecha_de_retorno = input("Indica la fecha final del período (MM/DD/AAAA): ")
-            try:
-                fecha_de_retorno = datetime.datetime.strptime(fecha_de_retorno, "%m/%d/%Y").date()
-                if fecha_de_retorno >= fecha_prestamo:
+            while True:
+                try:
+                    fecha_inicial = input("Ingresa la fecha inicial del periodo (MM/DD/AAAA): ")
+                    fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
                     break
-                else:
-                    print("La fecha final debe ser posterior o igual a la fecha inicial.")
-            except ValueError:
-                print("Formato de fecha incorrecto, intenta de nuevo.")
+                except ValueError:
+                    print("Formato de fecha incorrecto, intenta de nuevo.")
 
-        # Mostrar el reporte
-        print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
-        print("=" * 80)
+            while True:
+                try:
+                    fecha_final = input("Ingresa la fecha final del periodo (MM/DD/AAAA): ")
+                    fecha_final = datetime.strptime(fecha_final, "%m/%d/%Y").date()
+                    if fecha_final >= fecha_inicial:
+                        break
+                    else:
+                        print("La fecha final debe ser posterior o igual a la fecha inicial.")
+                except ValueError:
+                    print("Formato de fecha incorrecto, intenta de nuevo.")
 
-        for folio, datos in prestamos.items():
-            fecha_prestamo = datetime.datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
-            if fecha_prestamo <= fecha_prestamo <= fecha_de_retorno:
-                print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
+            print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
+            print("=" * 80)
 
-        print("=" * 80)
+            for folio, datos in prestamos.items():
+                fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
+                if fecha_inicial <= fecha_prestamo <= fecha_final:
+                    print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
 
-        # Opciones de exportación
-        export_opcion = input("Elige una opción de exportación:\n1. CSV\n2. Excel\n3. Ambos\n 4. No deseo exportar.")
-        if export_opcion == "1":
-            export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno)
-        elif export_opcion == "2":
-            export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno)
-        elif export_opcion == "3":
-            export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno)
-            export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno)
-        elif export_opcion == "4":
-            return False
-        else:
-            print("Elige una opción válida (1, 2 o 3).")
-    else:
-        print("No se encontró ningún préstamo.")
-        opciones_report()
+            print("=" * 80)
+
+            export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n"))
+            if export_opcion == 1:
+                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            elif export_opcion == 2:
+                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            elif export_opcion == 3:
+                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            else:
+                print("Elige una opción válida (1, 2 o 3).")
+    else: 
+        print("No hay préstamos para realizar un reporte")
         
 def menu_export():
   opciones_report()
