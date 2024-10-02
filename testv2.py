@@ -355,16 +355,16 @@ def reporte_prestamos_por_retornar(prestamos):
     if prestamos:
         while True:
             try:
-                fecha_inicial = input("Ingresa la fecha inicial (dd/mm/aaaa): ")
-                fecha_inicial = datetime.strptime(fecha_inicial, "%d/%m/%Y").date()
+                fecha_inicial = input("Ingresa la fecha inicial (MM/DD/AAAA): ")
+                fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
                 break
             except ValueError:
                 print("Formato de fecha incorrecto, intenta de nuevo.")
         
         while True:
             try:
-                fecha_final = input("Ingresa la fecha final (dd/mm/aaaa): ")
-                fecha_final = datetime.strptime(fecha_final, "%d/%m/%Y").date()
+                fecha_final = input("Ingresa la fecha final (MM/DD/AAAA): ")
+                fecha_final = datetime.strptime(fecha_final, "%m/%d/%Y").date()
                 if fecha_final >= fecha_inicial:
                     break
                 else:
@@ -377,8 +377,8 @@ def reporte_prestamos_por_retornar(prestamos):
 
         for folio, datos in prestamos.items():
             if not datos["Retorno"]:
-                fecha_prestamo = datetime.strptime(datos["Fecha_prestamo"], "%d/%m/%Y").date()
-                fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%d/%m/%Y").date()
+                fecha_prestamo = datetime.strptime(datos["Fecha_prestamo"], "%m/%d/%Y").date()
+                fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date()
 
                 if fecha_inicial <= fecha_retorno <= fecha_final:
                     print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
@@ -393,6 +393,8 @@ def reporte_prestamos_por_retornar(prestamos):
         elif export_opcion == 3:
             export_csv_prestamos_retornar(prestamos, fecha_inicial, fecha_final)
             export_excel_prestamos_retornar(prestamos, fecha_inicial, fecha_final)
+        elif export_opcion == 4:
+            return False
         else:
             print("Elige una opción válida (1, 2 o 3).")
     else:
@@ -621,4 +623,4 @@ def menu_export():
 # Inicio del programa
 clientes = cargar_clientes_csv()
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
-menu_completo()lol
+menu_completo()
