@@ -170,7 +170,7 @@ def registrar_prestamo():
             
             if opcion == "S":
                 print("\n--- REGISTRO DE PRÉSTAMO ---")
-                fecha_actual = datetime.datetime.now().date()
+                fecha_actual = datetime.now().date()
                 folio = max(prestamos, default=0) + 1
 
                 # Captura de la clave de la unidad
