@@ -621,4 +621,4 @@ def menu_export():
 # Inicio del programa
 clientes = cargar_clientes_csv()
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
-menu_completo()
+menu_completo()lol
