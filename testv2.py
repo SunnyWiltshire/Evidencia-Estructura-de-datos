@@ -581,4 +581,4 @@ unidades = {}
 clientes = {}
 prestamos = {}
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
-menu_completo()
+menu_completo()lol
