@@ -7,7 +7,7 @@ clientes = {}
 prestamos = {}
 
 #funcion que despliega el menu principal
-def menu_completo():
+def menu_complesto():
     while True:
         print("\n--- MENÚ PRINCIPAL ---")
         print("1. Registro")
@@ -165,14 +165,25 @@ def export_clientes_auto(clientes):
         grabador.writerow(("Clave", "Apellidos", "Nombres", "Teléfono"))
         grabador.writerows([(clave, datos[0], datos[1], datos[2]) for clave, datos in clientes.items()])     
 
+def tab_prestamos():
+    print(f"{'Clave':^8}{'Apellidos': <41}{'Nombres': <41}{'Teléfono'}")
+    print("=" * 100)
+    for clave, datos in prestamos.items():
+        print(f"{clave:^8}{datos[0]: <41}{datos[1]: <41}{datos[2]: <41}{datos[3]}")
+    print("=" * 100)
+
 def registrar_prestamo():
     while True:
             opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
             
             if opcion == "S":
                 print("\n--- REGISTRO DE PRÉSTAMO ---")
+                tab_clientes()
+
                 fecha_actual = datetime.now().date()
                 folio = max(prestamos, default=0) + 1
+
+                
 
                 # Captura de la clave de la unidad
                 while True:
