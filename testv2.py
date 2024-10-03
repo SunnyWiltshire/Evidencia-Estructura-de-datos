@@ -279,7 +279,7 @@ def registrar_prestamo():
             else:
                 print("Opción inválida. Debes ingresar 'S' o 'N'.")
         
-#Función que despliega menú para hacer el retorno de la unidad (Carlos)
+#Función que despliega menú para hacer el retorno de la unidad (Carlos)kkk
 def menu_retorno():
     if prestamos:
       print("\n--- SUBMENÚ RETORNO ---")
