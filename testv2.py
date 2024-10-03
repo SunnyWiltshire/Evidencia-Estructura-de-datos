@@ -96,8 +96,9 @@ def registro_Unidad():
                 try:
                     rodada = int(entrada)
                     if rodada in [20, 26, 29]:
-                        unidades[clave] = rodada
+                        unidades[clave] = entrada
                         print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}")
+                        export_unidades_auto(unidades)
                         return False
                     else:
                         print("Por favor, ingrese un valor valido (20, 26 o 29).")
@@ -164,7 +165,14 @@ def export_clientes_auto(clientes):
     with open("Clientes_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_clientes:
         grabador = csv.writer(archivocsv_clientes)
         grabador.writerow(("Clave", "Apellidos", "Nombres", "Teléfono"))
-        grabador.writerows([(clave, datos[0], datos[1], datos[2]) for clave, datos in clientes.items()])     
+        grabador.writerows([(clave, datos[0], datos[1], datos[2]) for clave, datos in clientes.items()])    
+
+def export_unidades_auto(unidades):
+    with open("Unidades_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
+        grabador = csv.writer(archivocsv_unidades)
+        grabador.writerow(("Clave", "Apellidos", "Nombres", "Teléfono"))
+        grabador.writerows([(clave, rodada[0]) for clave, rodada in unidades.items()])
+   
 
 def tab_prestamos():
     print(f"{'Clave':^8}{'Apellidos': <41}{'Nombres': <41}{'Teléfono'}")
