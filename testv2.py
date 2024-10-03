@@ -6,6 +6,7 @@ unidades = {}
 clientes = {}
 prestamos = {}
 
+#HOLA EQUIPO
 #funcion que despliega el menu principal
 def menu_complesto():
     while True:
