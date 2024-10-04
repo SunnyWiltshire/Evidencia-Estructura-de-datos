@@ -180,13 +180,13 @@ def tab_prestamos():
         print(f"{clave:^8}{datos[0]: <41}{datos[1]: <41}{datos[2]: <41}{datos[3]}")
     print("=" * 100)
 
+
 def registrar_prestamo():
     while True:
             opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
             
             if opcion == "S":
                 print("\n--- REGISTRO DE PRÉSTAMO ---")
-                tab_clientes()
 
                 fecha_actual = datetime.now().date()
                 folio = max(prestamos, default=0) + 1
