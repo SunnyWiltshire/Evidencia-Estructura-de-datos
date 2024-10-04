@@ -169,7 +169,7 @@ def export_unidades_auto(unidades):
     with open("Unidades_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
         grabador = csv.writer(archivocsv_unidades)
         grabador.writerow(("Clave", "Rodada"))
-        grabador.writerows([(clave, rodada[0]) for clave, rodada in unidades.items()])
+        grabador.writerows([(clave, rodada) for clave, rodada in unidades.items()])
 
 def export_prestamos_auto(prestamos):
     with open("Prestamos_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_prestamo:
