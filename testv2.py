@@ -170,9 +170,49 @@ def export_clientes_auto(clientes):
 def export_unidades_auto(unidades):
     with open("Unidades_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
         grabador = csv.writer(archivocsv_unidades)
-        grabador.writerow(("Clave", "Apellidos", "Nombres", "Teléfono"))
+        grabador.writerow(("Clave", "Rodada"))
         grabador.writerows([(clave, rodada[0]) for clave, rodada in unidades.items()])
-   
+
+def export_prestamos_auto(prestamos):
+    with open("Prestamos_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_prestamo:
+        grabador = csv.writer(archivocsv_prestamo)
+        grabador.writerow(("Folio", "Clave Cliente", "Clave Unidad", "Fecha préstamo","Retorno"))
+        grabador.writerows([
+            (
+                folio,
+                datos['Clave_cliente'],
+                datos['Clave_unidad'],
+                datos['Fecha_prestamo'],
+                datos['Fecha_retorno'],
+                datos['Retorno']
+            )
+            for folio, datos in prestamos.items()
+        ])
+def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
+    unidades = {}
+    try:
+        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_unidades:
+            lector = csv.reader(archivocsv_unidades)
+            next(lector)
+            for fila in lector:
+                clave, rodada = fila
+                unidades[int(clave)] = (rodada)
+    except FileNotFoundError:
+        print("El archivo no existe. Se creará uno nuevo al exportar.")
+    return unidades
+
+def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
+    prestamos = {}
+    try:
+        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_prestamos:
+            lector = csv.reader(archivocsv_prestamos)
+            next(lector)
+            for fila in lector:
+                folio, Clave_cliente, Clave_unidad, Fecha_prestamo,Fecha_de_retorno, Retorno = fila
+                prestamos[int(folio)] = (Clave_cliente, Clave_unidad, Fecha_prestamo, Fecha_de_retorno, Retorno)
+    except FileNotFoundError:
+        print("El archivo no existe. Se creará uno nuevo al exportar.")
+    return prestamos
 
 def tab_prestamos():
     print(f"{'Clave':^8}{'Apellidos': <41}{'Nombres': <41}{'Teléfono'}")
@@ -280,8 +320,8 @@ def registrar_prestamo():
                 }
 
                 print(f"Préstamo registrado exitosamente. Folio: {folio}, Cliente: {Clave_cliente}, Unidad: {Clave_unidad}, Fecha de Préstamo: {fecha_prestamo}")
+                export_prestamos_auto(prestamos)
                 break
-
             elif opcion == "N":
                 # Regresar al menú si elige 'N'
                 break
@@ -637,5 +677,7 @@ def menu_export():
   
 # Inicio del programa
 clientes = cargar_clientes_csv()
+unidades = cargar_unidades_csv()
+prestamos = cargar_prestamos_csv()
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
 menu_completo()
