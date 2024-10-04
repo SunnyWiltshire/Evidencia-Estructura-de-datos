@@ -5,8 +5,6 @@ from openpyxl.styles import Font
 unidades = {}
 clientes = {}
 prestamos = {}
-#hola
-#HOLA EQUIPO
 #funcion que despliega el menu principal
 def menu_completo():
     while True:
