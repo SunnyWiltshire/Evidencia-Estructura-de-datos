@@ -5,7 +5,8 @@ from openpyxl.styles import Font
 unidades = {}
 clientes = {}
 prestamos = {}
-#hola puta
+#hola
+#HOLA EQUIPO
 #funcion que despliega el menu principal
 def menu_completo():
     while True:
@@ -170,7 +171,6 @@ def export_unidades_auto(unidades):
     with open("Unidades_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
         grabador = csv.writer(archivocsv_unidades)
         grabador.writerow(("Clave", "Rodada"))
-<<<<<<< HEAD
         grabador.writerows([(clave, rodada[0]) for clave, rodada in unidades.items()])
 
 def export_prestamos_auto(prestamos):
@@ -213,10 +213,6 @@ def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
     except FileNotFoundError:
         print("El archivo no existe. Se creará uno nuevo al exportar.")
     return prestamos
-=======
-        grabador.writerows([(clave, datos) for clave, datos in unidades.items()])
-   
->>>>>>> b5212591175969d98b3600016b6593fe4c010751
 
 def tab_prestamos():
     print(f"{'Clave':^8}{'Apellidos': <41}{'Nombres': <41}{'Teléfono'}")
@@ -414,19 +410,6 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
     except FileNotFoundError:
         print("El archivo no existe. Se creará uno nuevo al exportar.")
     return clientes
-
-def import_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
-    unidades = {}
-    try:
-        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_unidades:
-            lector = csv.reader(archivocsv_unidades)
-            next(lector)
-            for fila in lector:
-                clave, rodada  = fila
-                clientes[int(clave)] = (rodada)
-    except FileNotFoundError:
-        print("El archivo no existe. Se creará uno nuevo al exportar.")
-    return unidades
 
 def reporte_prestamos_por_retornar(prestamos):
     if prestamos:
@@ -694,11 +677,7 @@ def menu_export():
   
 # Inicio del programa
 clientes = cargar_clientes_csv()
-<<<<<<< HEAD
 unidades = cargar_unidades_csv()
 prestamos = cargar_prestamos_csv()
-=======
-unidades = import_unidades_csv()
->>>>>>> b5212591175969d98b3600016b6593fe4c010751
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
 menu_completo()
