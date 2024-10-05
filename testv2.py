@@ -212,16 +212,25 @@ def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
         print("El archivo no existe. Se creará uno nuevo al exportar.")
     return prestamos
 
-def tab_prestamos():
-    print(f"{'Clave':^8}{'Apellidos': <41}{'Nombres': <41}{'Teléfono'}")
-    print("=" * 100)
-    for clave, datos in prestamos.items():
-        print(f"{clave:^8}{datos[0]: <41}{datos[1]: <41}{datos[2]: <41}{datos[3]}")
-    print("=" * 100)
+
+def tab_prestamos_test1(clientes, unidades):
+    print(f"{'Clave del cliente':^15}{'Nombre del cliente':^30}{'Clave de la unidad':^20}{'Rodada':^10}")
+    print("=" * 80)
+    
+    # Iterar sobre clientes y asociar unidades, si las claves coinciden
+    for clave_cliente, datos_cliente in clientes.items():
+        if clave_cliente in unidades:
+            rodada = unidades[clave_cliente]
+            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^30}{clave_cliente:^20}{rodada:^10}")
+        else:
+            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^30}{'Sin unidad':^20}{'N/A':^10}")
+    
+    print("=" * 80)
 
 
 def registrar_prestamo():
     while True:
+            tab_prestamos_test1(clientes, unidades)
             opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
             
             if opcion == "S":
