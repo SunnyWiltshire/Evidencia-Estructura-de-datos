@@ -6,7 +6,7 @@ unidades = {}
 clientes = {}
 prestamos = {}
 #funcion que despliega el menu principal
-def menu_completo():
+def menu_principal():
     while True:
         print("\n--- MENÚ PRINCIPAL ---")
         print("1. Registro")
@@ -26,7 +26,7 @@ def menu_completo():
             elif opcion == 3:
                 menu_retorno()
             elif opcion == 4:
-                menu_export()
+                submenu_reportes()
             elif opcion == 5:
                 confirmacion = input("¿Desea salir del programa? (S/N)").upper()
                 if confirmacion == "S":
@@ -38,6 +38,21 @@ def menu_completo():
                     print("Opción invalida, ingrese los valores de 'S' o 'N'.")
             else:
                 print("Opción invalida, intentalo de nuevo.")
+        except ValueError:
+            print('Favor de ingresar un valor numerico')
+
+#funcion que pregunta al usuario si desea cancelar la accion que estaba haciendo
+def cancelar():
+    while True:
+        try:
+            respuesta = int(input("\nHa ocurrido un error. ¿Deseas cancelar o intentar de nuevo? \n1: cancelar  \n2: intentar de nuevo \n"))
+            if respuesta == 1:
+                print("Operacion cancelada.")
+                return True
+            elif respuesta == 2:
+                return False
+            else:
+                print("Opción no valida. Por favor, selecciona 1 para cancelar o 2 para intentar de nuevo.")
         except ValueError:
             print('Favor de ingresar un valor numerico')
             
@@ -66,23 +81,11 @@ def menu_registro():
             if cancelar():
                 break
 
-#funcion que pregunta al usuario si desea cancelar la accion que estaba haciendo
-def cancelar():
-    while True:
-        try:
-            respuesta = int(input("\nHa ocurrido un error. ¿Deseas cancelar o intentar de nuevo? \n1: cancelar  \n2: intentar de nuevo \n"))
-            if respuesta == 1:
-                print("Operacion cancelada.")
-                return True
-            elif respuesta == 2:
-                return False
-            else:
-                print("Opción no valida. Por favor, selecciona 1 para cancelar o 2 para intentar de nuevo.")
-        except ValueError:
-            print('Favor de ingresar un valor numerico')
+## FUNCIONES PARA EL REGISTRO DE UNA UNIDAD
 
 #funcion que permite registrar una unidad lista para un prestamo
 def registro_Unidad():
+    
     while True:
         opcion = input("¿Deseas realizar un registro de unidad? (S/N): ").upper()
 
@@ -111,7 +114,30 @@ def registro_Unidad():
         else:
             print("Opción inválida. Debes ingresar 'S' o 'N'.")
             return
-            
+
+## Exporta automaticamente las unidades para su lectura
+def export_unidades_auto(unidades):
+    with open("Unidades_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
+        grabador = csv.writer(archivocsv_unidades)
+        grabador.writerow(("Clave", "Rodada"))
+        grabador.writerows([(clave, rodada) for clave, rodada in unidades.items()])
+
+## Lee las unidades para no perder los datos
+def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
+    unidades = {}
+    try:
+        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_unidades:
+            lector = csv.reader(archivocsv_unidades)
+            next(lector)
+            for fila in lector:
+                clave, rodada = fila
+                unidades[int(clave)] = (rodada)
+    except FileNotFoundError:
+        print("El archivo no existe. Se creará uno nuevo al exportar.")
+    return unidades            
+
+## FUNCIONES PARA EL REGISTRO DE UN CLIENTE
+
 #funcion que permite registrar un cliente listo para solicitar un prestamo           
 def registro_Cliente():
     while True:
@@ -159,78 +185,33 @@ def registro_Cliente():
         else:
             print("Opción inválida. Debes ingresar 'S' o 'N'.")
 
+## Exporta automaticamente los clientes para su lectura
 def export_clientes_auto(clientes):
     with open("Clientes_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_clientes:
         grabador = csv.writer(archivocsv_clientes)
         grabador.writerow(("Clave", "Apellidos", "Nombres", "Teléfono"))
         grabador.writerows([(clave, datos[0], datos[1], datos[2]) for clave, datos in clientes.items()])    
 
-def export_unidades_auto(unidades):
-    with open("Unidades_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
-        grabador = csv.writer(archivocsv_unidades)
-        grabador.writerow(("Clave", "Rodada"))
-        grabador.writerows([(clave, rodada) for clave, rodada in unidades.items()])
-
-def export_prestamos_auto(prestamos):
-    with open("Prestamos_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_prestamo:
-        grabador = csv.writer(archivocsv_prestamo)
-        grabador.writerow(("Folio", "Clave Cliente", "Clave Unidad", "Fecha préstamo","Retorno"))
-        grabador.writerows([
-            (
-                folio,
-                datos['Clave_cliente'],
-                datos['Clave_unidad'],
-                datos['Fecha_prestamo'],
-                datos['Fecha_retorno'],
-                datos['Retorno']
-            )
-            for folio, datos in prestamos.items()
-        ])
-def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
-    unidades = {}
+## Lee los clientes para no perder los datos
+def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
+    clientes = {}
     try:
-        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_unidades:
-            lector = csv.reader(archivocsv_unidades)
+        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_clientes:
+            lector = csv.reader(archivocsv_clientes)
             next(lector)
             for fila in lector:
-                clave, rodada = fila
-                unidades[int(clave)] = (rodada)
+                clave, apellidos, nombres, telefono = fila
+                clientes[int(clave)] = (apellidos, nombres, telefono)
     except FileNotFoundError:
         print("El archivo no existe. Se creará uno nuevo al exportar.")
-    return unidades
+    return clientes
 
-def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
-    prestamos = {}
-    try:
-        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_prestamos:
-            lector = csv.reader(archivocsv_prestamos)
-            next(lector)
-            for fila in lector:
-                folio, Clave_cliente, Clave_unidad, Fecha_prestamo,Fecha_de_retorno, Retorno = fila
-                prestamos[int(folio)] = (Clave_cliente, Clave_unidad, Fecha_prestamo, Fecha_de_retorno, Retorno)
-    except FileNotFoundError:
-        print("El archivo no existe. Se creará uno nuevo al exportar.")
-    return prestamos
+## FUNCIONES PARA EL REGISTRO DE UN PRÉSTAMO
 
-
-def tab_prestamos_test1(clientes, unidades):
-    print(f"{'Clave del cliente':^15}{'Nombre del cliente':^30}{'Clave de la unidad':^20}{'Rodada':^10}")
-    print("=" * 80)
-    
-    # Iterar sobre clientes y asociar unidades, si las claves coinciden
-    for clave_cliente, datos_cliente in clientes.items():
-        if clave_cliente in unidades:
-            rodada = unidades[clave_cliente]
-            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^30}{clave_cliente:^20}{rodada:^10}")
-        else:
-            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^30}{'Sin unidad':^20}{'N/A':^10}")
-    
-    print("=" * 80)
-
-
+## Apartado para registrar los préstamos
 def registrar_prestamo():
     while True:
-            tab_prestamos_test1(clientes, unidades)
+            tab_prestamos(clientes, unidades)
             opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
             
             if opcion == "S":
@@ -238,8 +219,6 @@ def registrar_prestamo():
 
                 fecha_actual = datetime.now().date()
                 folio = max(prestamos, default=0) + 1
-
-                
 
                 # Captura de la clave de la unidad
                 while True:
@@ -255,8 +234,7 @@ def registrar_prestamo():
                     except ValueError:
                         if cancelar():
                             return
-                    
-
+        
                 # Captura de la clave del cliente
                 while True:
                     Clave_cliente = input("Clave del cliente: ")
@@ -334,8 +312,55 @@ def registrar_prestamo():
                 break
             else:
                 print("Opción inválida. Debes ingresar 'S' o 'N'.")
-        
-#Función que despliega menú para hacer el retorno de la unidad (Carlos)kkk
+
+## Impresión tabular que muestra los clientes y unidades al momento de realizar un préstamo
+def tab_prestamos(clientes, unidades):
+    print(f"{'Clave del cliente':^15}{'Nombre del cliente':^30}{'Clave de la unidad':^20}{'Rodada':^10}")
+    print("=" * 80)
+    
+    # Iterar sobre clientes y asociar unidades, si las claves coinciden
+    for clave_cliente, datos_cliente in clientes.items():
+        if clave_cliente in unidades:
+            rodada = unidades[clave_cliente]
+            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^30}{clave_cliente:^20}{rodada:^10}")
+        else:
+            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^30}{'Sin unidad':^20}{'N/A':^10}")
+    
+    print("=" * 80)
+
+## Exporta automaticamente los préstamos para su lectura
+def export_prestamos_auto(prestamos):
+    with open("Prestamos_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_prestamo:
+        grabador = csv.writer(archivocsv_prestamo)
+        grabador.writerow(("Folio", "Clave Cliente", "Clave Unidad", "Fecha préstamo","Retorno"))
+        grabador.writerows([
+            (
+                folio,
+                datos['Clave_cliente'],
+                datos['Clave_unidad'],
+                datos['Fecha_prestamo'],
+                datos['Fecha_retorno'],
+                datos['Retorno']
+            )
+            for folio, datos in prestamos.items()
+        ])
+    
+## Lee los préstamos para no perder los datos
+def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
+    prestamos = {}
+    try:
+        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_prestamos:
+            lector = csv.reader(archivocsv_prestamos)
+            next(lector)
+            for fila in lector:
+                folio, Clave_cliente, Clave_unidad, Fecha_prestamo,Fecha_de_retorno, Retorno = fila
+                prestamos[int(folio)] = (Clave_cliente, Clave_unidad, Fecha_prestamo, Fecha_de_retorno, Retorno)
+    except FileNotFoundError:
+        print("El archivo no existe. Se creará uno nuevo al exportar.")
+    return prestamos
+
+## MENU DE RETORNO        
+#Función que despliega menú para hacer el retorno de la unidad
 def menu_retorno():
     if prestamos:
       print("\n--- SUBMENÚ RETORNO ---")
@@ -361,7 +386,74 @@ def menu_retorno():
     else:
       print("No hay ningún prestamo realizado.")
 
-## JESÚS        
+## MENU DE REPORTES
+def submenu_reportes():
+
+  while True:
+    print("\n--- SUBMENÚ REPORTES ---")
+    print("1. Clientes")
+    print("2. préstamos por retornar")
+    print("3. préstamos por periodo")
+    print("4. Salir al menú principal\n")
+
+    try:
+      reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
+      if reporte_opcion == 1:
+        exportar_clientes()
+      elif reporte_opcion == 2:
+        reporte_prestamos_por_retornar(prestamos)
+      elif reporte_opcion == 3:
+        prestamos_por_periodo()
+      elif reporte_opcion == 4:
+        return False
+      else:
+        print("Ingresa una opción válida")
+    except Exception as error_name:
+        print("Ha ocurrido un error")
+
+## SUBMENU REPORTES CLIENTES
+def exportar_clientes():
+    while True:
+        if clientes:
+            tab_clientes(clientes)
+            try:
+                export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4. Salir al submenú\n"))
+                if export_opcion == 1:
+                    export_csv_clientes(clientes)
+                elif export_opcion == 2:
+                    export_excel_clientes(clientes)
+                elif export_opcion == 3:
+                    export_csv_clientes(clientes)
+                    export_excel_clientes(clientes)
+                elif export_opcion == 4:
+                    break
+                else:
+                    print("Elige una opcion valida")
+            except ValueError:
+                    print("Error: Debes ingresar un número entero que sea válido.")
+            except Exception as name_error:
+                    print(f"Ha ocurrido un error inesperado: {name_error}")
+            else:
+                print("No hay clientes para exportar")
+                break
+
+## Impresión tabular que muestra los clientes
+def tab_clientes(clientes):
+    print(f"{'Clave':^8}{'Apellidos': <41}{'Nombres': <41}{'Teléfono'}")
+    print("=" * 100)
+    for clave, datos in clientes.items():
+        print(f"{clave:^8}{datos[0]: <41}{datos[1]: <41}{datos[2]}")
+    print("=" * 100)
+
+## Exporta los clientes en formato csv
+def export_csv_clientes(clientes):
+    with open("Clientes_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_clientes:
+        grabador = csv.writer(archivocsv_clientes)
+        grabador.writerow(("Clave", "Apellidos", "Nombres", "Teléfono"))
+        grabador.writerows([(clave, datos[0], datos[1], datos[2]) for clave, datos in clientes.items()])
+    print("Datos exportados con éxito en Clientes_bicicletas.csv")
+
+## Exporta los clientes en formato excel
 def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
     libro = openpyxl.Workbook()
 
@@ -391,33 +483,7 @@ def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
     libro.save(name_excel)
     print(f"Datos exportados con éxito en {name_excel}")
 
-def tab_clientes(clientes):
-    print(f"{'Clave':^8}{'Apellidos': <41}{'Nombres': <41}{'Teléfono'}")
-    print("=" * 100)
-    for clave, datos in clientes.items():
-        print(f"{clave:^8}{datos[0]: <41}{datos[1]: <41}{datos[2]}")
-    print("=" * 100)
-
-def export_csv_clientes(clientes):
-    with open("Clientes_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_clientes:
-        grabador = csv.writer(archivocsv_clientes)
-        grabador.writerow(("Clave", "Apellidos", "Nombres", "Teléfono"))
-        grabador.writerows([(clave, datos[0], datos[1], datos[2]) for clave, datos in clientes.items()])
-    print("Datos exportados con éxito en Clientes_bicicletas.csv")
-  
-def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
-    clientes = {}
-    try:
-        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_clientes:
-            lector = csv.reader(archivocsv_clientes)
-            next(lector)
-            for fila in lector:
-                clave, apellidos, nombres, telefono = fila
-                clientes[int(clave)] = (apellidos, nombres, telefono)
-    except FileNotFoundError:
-        print("El archivo no existe. Se creará uno nuevo al exportar.")
-    return clientes
-
+## SUBMENU REPORTES PRÉSTAMOS POR RETORNAR
 def reporte_prestamos_por_retornar(prestamos):
     if prestamos:
         while True:
@@ -467,11 +533,12 @@ def reporte_prestamos_por_retornar(prestamos):
     else:
         print("No se encontró ningún préstamo.")
 
+## Exporta los préstamos por retornar en formato excel
 def export_excel_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, name_excel="Prestamos_por_retornar.xlsx"):
     libro = openpyxl.Workbook()
 
     hoja = libro.active
-    hoja.title = "Prestamos"
+    hoja.title = "préstamos"
 
     hoja["A1"].value = "Folio"
     hoja["B1"].value = "Clave de la unidad"
@@ -500,6 +567,7 @@ def export_excel_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno,
     libro.save(name_excel)
     print(f"Datos exportados con éxito en {name_excel}")
 
+## Exporta los préstamos por retornar en formato csv
 def export_csv_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, nombre_csv="Prestamos_por_retornar.csv"):
     with open(nombre_csv, "w", encoding="latin1", newline="") as archivo_csv:
         grabador = csv.writer(archivo_csv)
@@ -519,59 +587,56 @@ def export_csv_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, n
         else:
             print("No hay préstamos que coincidan con los criterios especificados.")
 
-def exportar_clientes():
-    while True:
-        if clientes:
-            tab_clientes(clientes)
-            try:
-                export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4. Salir al submenú\n"))
-                if export_opcion == 1:
-                    export_csv_clientes(clientes)
-                elif export_opcion == 2:
-                    export_excel_clientes(clientes)
-                elif export_opcion == 3:
-                    export_csv_clientes(clientes)
-                    export_excel_clientes(clientes)
-                elif export_opcion == 4:
+## SUBMENU PRÉSTAMOS POR PERIODO
+def prestamos_por_periodo():
+    if prestamos:
+            while True:
+                try:
+                    fecha_inicial = input("Ingresa la fecha inicial del periodo (MM/DD/AAAA): ")
+                    fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
                     break
-                else:
-                    print("Elige una opcion valida")
-            except ValueError:
-                    print("Error: Debes ingresar un número entero que sea válido.")
-            except Exception as name_error:
-                    print(f"Ha ocurrido un error inesperado: {name_error}")
+                except ValueError:
+                    print("Formato de fecha incorrecto, intenta de nuevo.")
+
+            while True:
+                try:
+                    fecha_final = input("Ingresa la fecha final del periodo (MM/DD/AAAA): ")
+                    fecha_final = datetime.strptime(fecha_final, "%m/%d/%Y").date()
+                    if fecha_final >= fecha_inicial:
+                        break
+                    else:
+                        print("La fecha final debe ser posterior o igual a la fecha inicial.")
+                except ValueError:
+                    print("Formato de fecha incorrecto, intenta de nuevo.")
+
+            print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
+            print("=" * 80)
+
+            for folio, datos in prestamos.items():
+                fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
+                if fecha_inicial <= fecha_prestamo <= fecha_final:
+                    print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
+
+            print("=" * 80)
+
+            export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n"))
+            if export_opcion == 1:
+                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            elif export_opcion == 2:
+                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            elif export_opcion == 3:
+                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
             else:
-                print("No hay clientes para exportar")
-                break
+                print("Elige una opción válida (1, 2 o 3).")
+    else: 
+        print("No hay préstamos para realizar un reporte")
 
-def opciones_report():
-
-  while True:
-    print("\n--- SUBMENÚ REPORTES ---")
-    print("1. Clientes")
-    print("2. Prestamos por retornar")
-    print("3. Prestamos por periodo")
-    print("4. Salir al menú principal\n")
-
-    try:
-      reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
-      if reporte_opcion == 1:
-        exportar_clientes()
-      elif reporte_opcion == 2:
-        reporte_prestamos_por_retornar(prestamos)
-      elif reporte_opcion == 3:
-        prestamos_por_periodo()
-      elif reporte_opcion == 4:
-        return False
-      else:
-        print("Ingresa una opción válida")
-    except Exception as error_name:
-        print("Ha ocurrido un error")
-
+## Exporta los préstamos por periodo en formato excel
 def export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno, name_excel="Prestamos_por_periodo.xlsx"):
     libro = openpyxl.Workbook()
     hoja = libro.active
-    hoja.title = "Prestamos"
+    hoja.title = "préstamos"
 
     hoja["A1"].value = "Folio"
     hoja["B1"].value = "Clave de la unidad"
@@ -616,7 +681,8 @@ def export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retor
     libro.save(name_excel)
     
     print(f"Datos exportados con éxito en {name_excel}")
-    
+
+## Exporta los préstamos por periodo en formato csv
 def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno, nombre_csv="Prestamos_por_periodo.csv"):
     with open(nombre_csv, "w", encoding="latin1", newline="") as archivo_csv:
         grabador = csv.writer(archivo_csv)
@@ -634,57 +700,10 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
         else:
             print("No hay préstamos que coincidan con los criterios especificados.")
 
-def prestamos_por_periodo():
-    if prestamos:
-            while True:
-                try:
-                    fecha_inicial = input("Ingresa la fecha inicial del periodo (MM/DD/AAAA): ")
-                    fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
-                    break
-                except ValueError:
-                    print("Formato de fecha incorrecto, intenta de nuevo.")
-
-            while True:
-                try:
-                    fecha_final = input("Ingresa la fecha final del periodo (MM/DD/AAAA): ")
-                    fecha_final = datetime.strptime(fecha_final, "%m/%d/%Y").date()
-                    if fecha_final >= fecha_inicial:
-                        break
-                    else:
-                        print("La fecha final debe ser posterior o igual a la fecha inicial.")
-                except ValueError:
-                    print("Formato de fecha incorrecto, intenta de nuevo.")
-
-            print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
-            print("=" * 80)
-
-            for folio, datos in prestamos.items():
-                fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
-                if fecha_inicial <= fecha_prestamo <= fecha_final:
-                    print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
-
-            print("=" * 80)
-
-            export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n"))
-            if export_opcion == 1:
-                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            elif export_opcion == 2:
-                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            elif export_opcion == 3:
-                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            else:
-                print("Elige una opción válida (1, 2 o 3).")
-    else: 
-        print("No hay préstamos para realizar un reporte")
         
-def menu_export():
-  opciones_report()
-  
-  
 # Inicio del programa
 clientes = cargar_clientes_csv()
 unidades = cargar_unidades_csv()
 prestamos = cargar_prestamos_csv()
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
-menu_completo()
+menu_principal()
