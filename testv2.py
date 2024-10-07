@@ -58,7 +58,6 @@ def cancelar():
             
 #funcion que despliega el sub menú de registro
 def menu_registro():
-    print("\n Menú Principal > Menú Registro \n")
     while True:
         print("\n--- SUBMENÚ REGISTRO ---")
         print("1. Registrar una unidad")
@@ -85,7 +84,7 @@ def menu_registro():
 
 #funcion que permite registrar una unidad lista para un prestamo
 def registro_Unidad():
-    print("\n Menú Principal > Menú Registro > Registro Unidad \n")
+    
     
     while True:
         opcion = input("¿Deseas realizar un registro de unidad? (S/N): ").upper()
@@ -154,7 +153,6 @@ def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
 #funcion que permite registrar un cliente listo para solicitar un prestamo           
 def registro_Cliente():
     while True:
-        print ("\n Menú Principal > Menú Registro > Registro Cliente \n")
         opcion = input("¿Deseas realizar un registro de cliente? (S/N): ").upper()
 
         if opcion == "S":
@@ -225,7 +223,6 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
 ## Apartado para registrar los préstamos
 def registrar_prestamo():
     while True:
-            print("\n Menú Principal > Registro Préstamo\n")
             tab_prestamos(clientes, unidades)
             opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
             
