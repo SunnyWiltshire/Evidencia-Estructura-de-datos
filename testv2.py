@@ -144,6 +144,8 @@ Rosa""")
             return False
         else:
             print("Opción inválida. Debes ingresar 'S' o 'N'.")
+            if cancelar():
+                break
             return
 
 ## Exporta automaticamente las unidades para su lectura
@@ -300,17 +302,21 @@ def registrar_prestamo():
                                         break
                                     else:
                                         print("La fecha no puede ser anterior a la actual.")
+                                        if cancelar():
+                                            break
                                 except ValueError:
                                     print("Formato de fecha incorrecto, intenta de nuevo.")
+                                    if cancelar():
+                                        break
                             break
                         else:
                             print("Opción inválida, intenta de nuevo.")
                             if cancelar():
-                                return
+                                break
                     except ValueError:
                         print("Entrada inválida, elige 1 o 2.")
                         if cancelar():
-                            return
+                            break
                 # Cantidad de días del prestamo
                 while True:
                     Cantidad_de_dias = input("¿Cuantos dias de prestamo solicitas?: ")
@@ -323,10 +329,10 @@ def registrar_prestamo():
                         else:
                             print("La cantidad de dias debe ser mayor a 0.")
                             if cancelar():
-                                return
+                                break
                     except ValueError:
                         if cancelar():
-                            return
+                            break
                         
                 # Registro del préstamo
                 prestamos[folio] = {
@@ -345,6 +351,8 @@ def registrar_prestamo():
                 break
             else:
                 print("Opción inválida. Debes ingresar 'S' o 'N'.")
+                if cancelar():
+                    break
 
 ## Impresión tabular que muestra los clientes y unidades al momento de realizar un préstamo
 def tab_prestamos(clientes, unidades):
@@ -414,8 +422,12 @@ def menu_retorno():
                           break
                       else:
                           print("El número de folio no existe. Por favor, inténtalo de nuevo.")
+                          if cancelar():
+                            break
                   except ValueError:
                       print("Por favor, ingrese un número entero.")
+                      if cancelar():
+                        break
                 break
           elif opcion == "2":
               break
@@ -453,6 +465,8 @@ def submenu_reportes():
         print("Ingresa una opción válida")
     except Exception as error_name:
         print(f"Ha ocurrido un error: {error_name}")
+        if cancelar():
+            break
 
 ## SUBMENU REPORTES CLIENTES
 def exportar_clientes():
@@ -473,10 +487,16 @@ def exportar_clientes():
                     break
                 else:
                     print("Elige una opcion valida")
+                    if cancelar():
+                        break
             except ValueError:
                     print("Error: Debes ingresar un número entero que sea válido.")
+                    if cancelar():
+                        break
             except Exception as name_error:
                     print(f"Ha ocurrido un error inesperado: {name_error}")
+                    if cancelar():
+                        break
             else:
                 print("No hay clientes para exportar")
                 break
@@ -545,12 +565,16 @@ def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
 def reporte_prestamos_por_retornar(prestamos):
     if prestamos:
         while True:
+            mostrar_ruta()
             try:
-                fecha_inicial = input("Ingresa la fecha inicial (MM/DD/AAAA): ")
+                fecha_inicial = input("\nIngresa la fecha inicial (MM/DD/AAAA): ")
                 fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
                 break
             except ValueError:
                 print("Formato de fecha incorrecto, intenta de nuevo.")
+                if cancelar():
+                    break
+
         
         while True:
             try:
@@ -560,8 +584,12 @@ def reporte_prestamos_por_retornar(prestamos):
                     break
                 else:
                     print("La fecha final debe ser posterior o igual a la fecha inicial.")
+                    if cancelar():
+                        break
             except ValueError:
                 print("Formato de fecha incorrecto, intenta de nuevo.")
+                if cancelar():
+                    break
                 
         print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
         print("=" * 80)
@@ -587,7 +615,9 @@ def reporte_prestamos_por_retornar(prestamos):
         elif export_opcion == 4:
             return False
         else:
-            print("Elige una opción válida (1, 2 o 3).")
+            print("Elige una opción válida (1, 2, 3 o 4).")
+            if cancelar():
+                return False
     else:
         print("No se encontró ningún préstamo.")
 
@@ -649,12 +679,15 @@ def export_csv_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, n
 def prestamos_por_periodo():
     if prestamos:
             while True:
+                mostrar_ruta()
                 try:
-                    fecha_inicial = input("Ingresa la fecha inicial del periodo (MM/DD/AAAA): ")
+                    fecha_inicial = input("\nIngresa la fecha inicial del periodo (MM/DD/AAAA): ")
                     fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
                     break
                 except ValueError:
                     print("Formato de fecha incorrecto, intenta de nuevo.")
+                    if cancelar():
+                        break
 
             while True:
                 try:
@@ -664,8 +697,12 @@ def prestamos_por_periodo():
                         break
                     else:
                         print("La fecha final debe ser posterior o igual a la fecha inicial.")
+                        if cancelar():
+                            break
                 except ValueError:
                     print("Formato de fecha incorrecto, intenta de nuevo.")
+                    if cancelar():
+                        break
 
             print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
             print("=" * 80)
@@ -688,7 +725,9 @@ def prestamos_por_periodo():
             elif export_opcion == 4:
                 return False
             else:
-                print("Elige una opción válida (1, 2 o 3).")
+                print("Elige una opción válida (1, 2, 3 o 4).")
+                if cancelar():
+                    return False
     else: 
         print("No hay préstamos para realizar un reporte")
 
@@ -759,6 +798,8 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
             print(f"Datos exportados con éxito en {nombre_csv}")
         else:
             print("No hay préstamos que coincidan con los criterios especificados.")
+            if cancelar():
+                return False
 
         
 # Inicio del programa
