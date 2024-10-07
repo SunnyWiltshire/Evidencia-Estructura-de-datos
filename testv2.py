@@ -133,7 +133,7 @@ def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
                 clave, rodada = fila
                 unidades[int(clave)] = (rodada)
     except FileNotFoundError:
-        print("El archivo no existe. Se creará uno nuevo al exportar.")
+        print("El archivo de unidades no existe. Se creará uno nuevo al exportar.")
     return unidades            
 
 ## FUNCIONES PARA EL REGISTRO DE UN CLIENTE
@@ -203,7 +203,7 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
                 clave, apellidos, nombres, telefono = fila
                 clientes[int(clave)] = (apellidos, nombres, telefono)
     except FileNotFoundError:
-        print("El archivo no existe. Se creará uno nuevo al exportar.")
+        print("El archivo de clientes no existe. Se creará uno nuevo al exportar.")
     return clientes
 
 ## FUNCIONES PARA EL REGISTRO DE UN PRÉSTAMO
@@ -285,7 +285,7 @@ def registrar_prestamo():
                         Cantidad_de_dias = int(Cantidad_de_dias)
                         if Cantidad_de_dias > 0:
                             fecha_de_retorno = fecha_prestamo + timedelta(days=Cantidad_de_dias)
-                            print(f"La fecha en la que se debe de regresar la unidad es el: {fecha_de_retorno.strftime('%d/%m/%Y')}")
+                            print(f"La fecha en la que se debe de regresar la unidad es el: {fecha_de_retorno.strftime('%m/%d/%Y')}")
                             break
                         else:
                             print("La cantidad de dias debe ser mayor a 0.")
@@ -300,7 +300,7 @@ def registrar_prestamo():
                     'Clave_cliente': Clave_cliente,
                     'Clave_unidad': Clave_unidad,
                     'Fecha_prestamo': fecha_prestamo.strftime("%m/%d/%Y"),
-                    'Fecha_retorno': fecha_de_retorno.strftime('%d/%m/%Y'),
+                    'Fecha_retorno': fecha_de_retorno.strftime('%m/%d/%Y'),
                     "Retorno": False
                 }
 
@@ -315,18 +315,18 @@ def registrar_prestamo():
 
 ## Impresión tabular que muestra los clientes y unidades al momento de realizar un préstamo
 def tab_prestamos(clientes, unidades):
-    print(f"{'Clave del cliente':^15}{'Nombre del cliente':^30}{'Clave de la unidad':^20}{'Rodada':^10}")
-    print("=" * 80)
+    print(f"{'Clave del cliente':^15}{'Nombre del cliente':^41}{'Clave de la unidad':^20}{'Rodada':^10}")
+    print("=" * 100)
     
     # Iterar sobre clientes y asociar unidades, si las claves coinciden
     for clave_cliente, datos_cliente in clientes.items():
         if clave_cliente in unidades:
             rodada = unidades[clave_cliente]
-            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^30}{clave_cliente:^20}{rodada:^10}")
+            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^41}{clave_cliente:^20}{rodada:^10}")
         else:
-            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^30}{'Sin unidad':^20}{'N/A':^10}")
+            print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^41}{'Sin unidad':^20}{'N/A':^10}")
     
-    print("=" * 80)
+    print("=" * 100)
 
 ## Exporta automaticamente los préstamos para su lectura
 def export_prestamos_auto(prestamos):
@@ -354,9 +354,9 @@ def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
             next(lector)
             for fila in lector:
                 folio, Clave_cliente, Clave_unidad, Fecha_prestamo,Fecha_de_retorno, Retorno = fila
-                prestamos[int(folio)] = (Clave_cliente, Clave_unidad, Fecha_prestamo, Fecha_de_retorno, Retorno)
+                prestamos[int(folio)] = {'Clave_cliente': Clave_cliente, 'Clave_unidad': Clave_unidad, 'Fecha_prestamo': Fecha_prestamo, 'Fecha_retorno': Fecha_de_retorno, 'Retorno': Retorno}
     except FileNotFoundError:
-        print("El archivo no existe. Se creará uno nuevo al exportar.")
+        print("El archivo de préstamos no existe. Se creará uno nuevo al exportar.")
     return prestamos
 
 ## MENU DE RETORNO        
@@ -368,19 +368,21 @@ def menu_retorno():
           opcion = input("¿Deseas retornar una unidad? \n 1. Si \n 2. No, volver al menu principal \n Elige una opción: \n")
 
           if opcion == "1":
-              while True:
+                while True:
                   numdefolio = input("\nIngrese el número de folio de su préstamo: \n")
                   try:
                       numdefolio = int(numdefolio)
                       if numdefolio in prestamos:
                           today = datetime.now().date()
                           prestamos[numdefolio]["Retorno"] = True  #v2
-                          print("Retornó su unidad exitosamente el día", today.strftime('%d/%m/%Y'), "\n")
+                          print("Retornó su unidad exitosamente el día", today.strftime('%m/%d/%Y'), "\n")
+                          export_prestamos_auto(prestamos)
                           break
                       else:
                           print("El número de folio no existe. Por favor, inténtalo de nuevo.")
                   except ValueError:
                       print("Por favor, ingrese un número entero.")
+                break
           elif opcion == "2":
               break
     else:
@@ -409,7 +411,7 @@ def submenu_reportes():
       else:
         print("Ingresa una opción válida")
     except Exception as error_name:
-        print("Ha ocurrido un error")
+        print(f"Ha ocurrido un error: {error_name}")
 
 ## SUBMENU REPORTES CLIENTES
 def exportar_clientes():
@@ -453,10 +455,23 @@ def export_csv_clientes(clientes):
         grabador.writerows([(clave, datos[0], datos[1], datos[2]) for clave, datos in clientes.items()])
     print("Datos exportados con éxito en Clientes_bicicletas.csv")
 
+## funcion para ajustar el ancho de las columnas en excel
+def ajustar_ancho_columnas(hoja):
+    for column_cells in hoja.columns:
+        max_length = 0
+        column = column_cells[0].column_letter  
+        for cell in column_cells:
+            try:  
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)  
+        hoja.column_dimensions[column].width = adjusted_width
+
 ## Exporta los clientes en formato excel
 def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
     libro = openpyxl.Workbook()
-
     hoja = libro.active
     hoja.title = "Clientes"
 
@@ -479,7 +494,8 @@ def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
         hoja.cell(row=i, column=3).value = nombres
         hoja.cell(row=i, column=4).value = telefono
         i += 1
-
+        
+    ajustar_ancho_columnas(hoja)
     libro.save(name_excel)
     print(f"Datos exportados con éxito en {name_excel}")
 
@@ -509,7 +525,7 @@ def reporte_prestamos_por_retornar(prestamos):
         print("=" * 80)
 
         for folio, datos in prestamos.items():
-            if not datos["Retorno"]:
+            if datos['Retorno'] == 'False':
                 fecha_prestamo = datetime.strptime(datos["Fecha_prestamo"], "%m/%d/%Y").date()
                 fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date()
 
@@ -518,7 +534,7 @@ def reporte_prestamos_por_retornar(prestamos):
 
         print("=" * 80)
 
-        export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n"))
+        export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n 4.No deseo exportarlo"))
         if export_opcion == 1:
             export_csv_prestamos_retornar(prestamos, fecha_inicial, fecha_final)
         elif export_opcion == 2:
@@ -563,7 +579,7 @@ def export_excel_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno,
                 hoja.cell(row=i, column=4).value = datos["Fecha_prestamo"]
                 hoja.cell(row=i, column=5).value = datos["Fecha_retorno"]
                 i += 1
-
+    ajustar_ancho_columnas(hoja)
     libro.save(name_excel)
     print(f"Datos exportados con éxito en {name_excel}")
 
@@ -578,7 +594,7 @@ def export_csv_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, n
         prestamos_filtrados = [
             (folio, datos["Clave_unidad"], datos["Clave_cliente"], datos["Fecha_prestamo"], datos["Fecha_retorno"])
             for folio, datos in prestamos.items()
-            if not datos["Retorno"] and fecha_prestamo <= datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date() <= fecha_de_retorno
+            if fecha_prestamo <= datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date() <= fecha_de_retorno
         ]
 
         if prestamos_filtrados:
@@ -627,6 +643,8 @@ def prestamos_por_periodo():
             elif export_opcion == 3:
                 export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
                 export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            elif export_opcion == 4:
+                return False
             else:
                 print("Elige una opción válida (1, 2 o 3).")
     else: 
@@ -676,7 +694,7 @@ def export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retor
             hoja.column_dimensions["E"].width = max(hoja.column_dimensions["E"].width or 0, len(str(datos["Fecha_retorno"])))
 
             i += 1  # Incrementa la fila
-
+    ajustar_ancho_columnas(hoja)
     # Guarda el archivo Excel
     libro.save(name_excel)
     
