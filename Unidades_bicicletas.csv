@@ -1,4 +1,4 @@
-Clave,Rodada
+Clave,Rodada,Color
 1,20
 2,26
 3,29
@@ -8,4 +8,5 @@ Clave,Rodada
 7,26
 8,29
 9,26
-10,29
+10,"('29', 'VERDE')"
+11,"('26', 'ROJO')"

@@ -6,7 +6,6 @@ unidades = {}
 clientes = {}
 prestamos = {}
 #funcion que despliega el menu principal
-#hola
 def menu_principal():
     while True:
         print("\n--- MENÚ PRINCIPAL ---")
@@ -98,14 +97,24 @@ def registro_Unidad():
                 try:
                     rodada = int(entrada)
                     if rodada in [20, 26, 29]:
-                        unidades[clave] = entrada
-                        print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}")
-                        export_unidades_auto(unidades)
+                        print("""\nTenemos disponibles los siguientes colores: 
+                        Rojo
+                        Azul
+                        Amarillo
+                        Verde
+                        Rosa""")
+                        color = input("Elige un color para la bicicleta: ").upper()
+                        if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
+                            print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
+                            unidades[clave] = (entrada, color)
+                            export_unidades_auto(unidades)
+                        else: print("error")
                         return False
                     else:
                         print("Por favor, ingrese un valor valido (20, 26 o 29).")
                         if cancelar():
                             break
+                    
                 except ValueError:
                     if cancelar():
                         break
