@@ -6,6 +6,7 @@ unidades = {}
 clientes = {}
 prestamos = {}
 #funcion que despliega el menu principal
+#hola
 def menu_principal():
     while True:
         print("\n--- MENÚ PRINCIPAL ---")
