@@ -12,7 +12,7 @@ def menu_principal():
         print("1. Registro")
         print("2. Prestamo")
         print("3. Retorno")
-        print("4. Reportes")
+        print("4. Informes")
         print("5. Salir\n")
 
         try:
@@ -26,7 +26,7 @@ def menu_principal():
             elif opcion == 3:
                 menu_retorno()
             elif opcion == 4:
-                submenu_reportes()
+                menu_informes()
             elif opcion == 5:
                 confirmacion = input("¿Desea salir del programa? (S/N)").upper()
                 if confirmacion == "S":
@@ -388,28 +388,57 @@ def menu_retorno():
     else:
       print("No hay ningún prestamo realizado.")
 
+## MENU INFORMES
+def menu_informes():
+    while True:
+        print("\n--- MENÚ INFORMES ---")
+        print("1. Reportes")
+        print("2. Análisis")
+        print("3. Volver al menú\n")
+
+        try:
+            opcion = input("Elige una de las siguientes opciones: ")
+            opcion = int(opcion)
+
+            if opcion == 1:
+                submenu_reportes()
+            elif opcion == 2:
+                submenu_analisis()
+            elif opcion == 3:
+                return False
+            else:
+                print("Opción invalida, intentalo de nuevo.")
+        except ValueError:
+            print('Favor de ingresar un valor numerico')
+
 ## MENU DE REPORTES
 def submenu_reportes():
 
   while True:
     print("\n--- SUBMENÚ REPORTES ---")
-    print("1. Clientes")
-    print("2. préstamos por retornar")
-    print("3. préstamos por periodo")
-    print("4. Salir al menú principal\n")
+    print("1. Clientes.")
+    print("2. Listado de unidades.")
+    print("3. Retrasos.")
+    print("4. préstamos por retornar.")
+    print("5. préstamos por periodo.")
+    print("6. Salir al menú principal\n")
 
     try:
-      reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
-      if reporte_opcion == 1:
-        exportar_clientes()
-      elif reporte_opcion == 2:
-        reporte_prestamos_por_retornar(prestamos)
-      elif reporte_opcion == 3:
-        prestamos_por_periodo()
-      elif reporte_opcion == 4:
-        return False
-      else:
-        print("Ingresa una opción válida")
+        reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
+        if reporte_opcion == 1:
+            exportar_clientes()
+        elif reporte_opcion == 2:
+            listado_unidades()
+        elif reporte_opcion == 3:
+            retrasos()
+        elif reporte_opcion == 4:
+            reporte_prestamos_por_retornar(prestamos)
+        elif reporte_opcion == 5:
+            prestamos_por_periodo()
+        elif reporte_opcion == 6:
+            return False
+        else:
+            print("Ingresa una opción válida")
     except Exception as error_name:
         print(f"Ha ocurrido un error: {error_name}")
 
@@ -498,6 +527,47 @@ def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
     ajustar_ancho_columnas(hoja)
     libro.save(name_excel)
     print(f"Datos exportados con éxito en {name_excel}")
+
+## SUBMENU LISTADO DE UNIDADES
+def listado_unidades():
+    while True:
+        print("\n--- LISTADO DE UNIDADES ---")
+        print("1. Completo")
+        print("2. Por rodada")
+        print("3. Por color")
+        print("4. Volver al menú de listado de unidades\n")
+
+        try:
+            opcion = input("Elige una de las siguientes opciones: ")
+            opcion = int(opcion)
+
+            if opcion == 1:
+                analisis_completo()
+            elif opcion == 2:
+                analisis_rodada()
+            elif opcion == 3:
+                analisis_color()
+            elif opcion == 4:
+                return False
+            else:
+                print("Opción invalida, intentalo de nuevo.")
+        except ValueError:
+            print('Favor de ingresar un valor numerico')
+
+## SUBMENU RETRASOS
+def retrasos():
+    print('print pa q no de error, favor d borrar')
+## SUBMENU ANÁLISIS COMPLETO
+def analisis_completo():
+    print('lolol')
+
+## SUBMENU ANÁLISIS POR RODADA
+def analisis_rodada():
+    print('lolol')
+
+## SUBMENU ANÁLISIS POR COLOR
+def analisis_color():
+    print('lolol')
 
 ## SUBMENU REPORTES PRÉSTAMOS POR RETORNAR
 def reporte_prestamos_por_retornar(prestamos):
@@ -718,7 +788,44 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
         else:
             print("No hay préstamos que coincidan con los criterios especificados.")
 
-        
+##Submenú analísis
+def submenu_analisis():
+    while True:
+        print("\n--- SUBMENÚ ANÁLISIS ---")
+        print("1. Duración de los préstamos.")
+        print("2. Ranking de clientes.")
+        print("3. Preferencias de rentas.")
+        print("4. Volver al menú\n")
+
+        try:
+            opcion = input("Elige una de las siguientes opciones: ")
+            opcion = int(opcion)
+
+            if opcion == 1:
+                duracion_prestamos()
+            elif opcion == 2:
+                ranking_clientes()
+            elif opcion == 3:
+                preferencias_rentas()
+            elif opcion == 4:
+                return False
+            else:
+                print("Opción invalida, intentalo de nuevo.")
+        except ValueError:
+            print('Favor de ingresar un valor numerico')
+            
+## SUBMENÚ DURACIÓN DE LOS PRÉSTAMOS
+def duracion_prestamos():
+    print('lolol')
+
+## SUBMENÚ RANKING CLIENTES
+def ranking_clientes():
+    print('lolol')
+
+## SUBMENÚ PREFERENCIAS RENTAS
+def preferencias_rentas():
+    print('lolol')
+
 # Inicio del programa
 clientes = cargar_clientes_csv()
 unidades = cargar_unidades_csv()
