@@ -5,9 +5,16 @@ from openpyxl.styles import Font
 unidades = {}
 clientes = {}
 prestamos = {}
+ruta = []
 #funcion que despliega el menu principal
+def mostrar_ruta():
+    print('\nRUTA: ')
+    print(" > ".join(ruta))
+
 def menu_principal():
+    ruta.append('Menu Principal')
     while True:
+        mostrar_ruta()
         print("\n--- MENÚ PRINCIPAL ---")
         print("1. Registro")
         print("2. Prestamo")
@@ -20,13 +27,21 @@ def menu_principal():
             opcion = int(opcion)
 
             if opcion == 1:
+                ruta.append("Registro")
                 menu_registro()
+                ruta.pop()
             elif opcion == 2:
+                ruta.append("Prestamo")
                 registrar_prestamo()
+                ruta.pop()
             elif opcion == 3:
+                ruta.append("Retorno")
                 menu_retorno()
+                ruta.pop()
             elif opcion == 4:
+                ruta.append("Reportes")
                 submenu_reportes()
+                ruta.pop()
             elif opcion == 5:
                 confirmacion = input("¿Desea salir del programa? (S/N)").upper()
                 if confirmacion == "S":
@@ -58,8 +73,8 @@ def cancelar():
             
 #funcion que despliega el sub menú de registro
 def menu_registro():
-    print("\n Menú Principal > Menú Registro \n")
     while True:
+        mostrar_ruta()
         print("\n--- SUBMENÚ REGISTRO ---")
         print("1. Registrar una unidad")
         print("2. Registrar un cliente")
@@ -70,9 +85,13 @@ def menu_registro():
             opcion = int(opcion)
 
             if opcion == 1:
+                ruta.append('Unidad')
                 registro_Unidad()
+                ruta.pop()
             elif opcion == 2:
+                ruta.append('Cliente')
                 registro_Cliente()
+                ruta.pop()
             elif opcion == 3:
                 break
             else:
@@ -85,9 +104,8 @@ def menu_registro():
 
 #funcion que permite registrar una unidad lista para un prestamo
 def registro_Unidad():
-    print("\n Menú Principal > Menú Registro > Registro Unidad \n")
-    
     while True:
+        mostrar_ruta()
         opcion = input("¿Deseas realizar un registro de unidad? (S/N): ").upper()
 
         if opcion == "S":
@@ -99,11 +117,11 @@ def registro_Unidad():
                     rodada = int(entrada)
                     if rodada in [20, 26, 29]:
                         print("""\nTenemos disponibles los siguientes colores: 
-                        Rojo
-                        Azul
-                        Amarillo
-                        Verde
-                        Rosa""")
+Rojo
+Azul
+Amarillo
+Verde
+Rosa""")
                         color = input("Elige un color para la bicicleta: ").upper()
                         if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
                             print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
@@ -154,7 +172,7 @@ def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
 #funcion que permite registrar un cliente listo para solicitar un prestamo           
 def registro_Cliente():
     while True:
-        print ("\n Menú Principal > Menú Registro > Registro Cliente \n")
+        mostrar_ruta()
         opcion = input("¿Deseas realizar un registro de cliente? (S/N): ").upper()
 
         if opcion == "S":
@@ -225,7 +243,7 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
 ## Apartado para registrar los préstamos
 def registrar_prestamo():
     while True:
-            print("\n Menú Principal > Registro Préstamo\n")
+            mostrar_ruta()
             tab_prestamos(clientes, unidades)
             opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
             
@@ -377,6 +395,7 @@ def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
 ## MENU DE RETORNO        
 #Función que despliega menú para hacer el retorno de la unidad
 def menu_retorno():
+    mostrar_ruta()
     if prestamos:
       print("\n--- SUBMENÚ RETORNO ---")
       while True:
@@ -407,6 +426,7 @@ def menu_retorno():
 def submenu_reportes():
 
   while True:
+    mostrar_ruta()
     print("\n--- SUBMENÚ REPORTES ---")
     print("1. Clientes")
     print("2. préstamos por retornar")
@@ -416,11 +436,17 @@ def submenu_reportes():
     try:
       reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
       if reporte_opcion == 1:
+        ruta.append('Exportar Clientes')
         exportar_clientes()
+        ruta.pop()
       elif reporte_opcion == 2:
+        ruta.append('Prestamos por retornar')
         reporte_prestamos_por_retornar(prestamos)
+        ruta.pop()
       elif reporte_opcion == 3:
+        ruta.append('Prestamos por periodo')
         prestamos_por_periodo()
+        ruta.pop()
       elif reporte_opcion == 4:
         return False
       else:
@@ -430,6 +456,7 @@ def submenu_reportes():
 
 ## SUBMENU REPORTES CLIENTES
 def exportar_clientes():
+    mostrar_ruta()
     while True:
         if clientes:
             tab_clientes(clientes)
