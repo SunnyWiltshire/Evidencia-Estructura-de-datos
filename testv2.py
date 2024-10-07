@@ -285,7 +285,7 @@ def registrar_prestamo():
                         Cantidad_de_dias = int(Cantidad_de_dias)
                         if Cantidad_de_dias > 0:
                             fecha_de_retorno = fecha_prestamo + timedelta(days=Cantidad_de_dias)
-                            print(f"La fecha en la que se debe de regresar la unidad es el: {fecha_de_retorno.strftime('%d/%m/%Y')}")
+                            print(f"La fecha en la que se debe de regresar la unidad es el: {fecha_de_retorno.strftime('%m/%d/%Y')}")
                             break
                         else:
                             print("La cantidad de dias debe ser mayor a 0.")
@@ -300,7 +300,7 @@ def registrar_prestamo():
                     'Clave_cliente': Clave_cliente,
                     'Clave_unidad': Clave_unidad,
                     'Fecha_prestamo': fecha_prestamo.strftime("%m/%d/%Y"),
-                    'Fecha_retorno': fecha_de_retorno.strftime('%d/%m/%Y'),
+                    'Fecha_retorno': fecha_de_retorno.strftime('%m/%d/%Y'),
                     "Retorno": False
                 }
 
@@ -368,20 +368,21 @@ def menu_retorno():
           opcion = input("¿Deseas retornar una unidad? \n 1. Si \n 2. No, volver al menu principal \n Elige una opción: \n")
 
           if opcion == "1":
-              while True:
+                while True:
                   numdefolio = input("\nIngrese el número de folio de su préstamo: \n")
                   try:
                       numdefolio = int(numdefolio)
                       if numdefolio in prestamos:
                           today = datetime.now().date()
                           prestamos[numdefolio]["Retorno"] = True  #v2
-                          print("Retornó su unidad exitosamente el día", today.strftime('%d/%m/%Y'), "\n")
-                          export_prestamos_auto()
+                          print("Retornó su unidad exitosamente el día", today.strftime('%m/%d/%Y'), "\n")
+                          export_prestamos_auto(prestamos)
                           break
                       else:
                           print("El número de folio no existe. Por favor, inténtalo de nuevo.")
                   except ValueError:
                       print("Por favor, ingrese un número entero.")
+                break
           elif opcion == "2":
               break
     else:
@@ -410,7 +411,7 @@ def submenu_reportes():
       else:
         print("Ingresa una opción válida")
     except Exception as error_name:
-        print("Ha ocurrido un error")
+        print(f"Ha ocurrido un error: {error_name}")
 
 ## SUBMENU REPORTES CLIENTES
 def exportar_clientes():
@@ -533,7 +534,7 @@ def reporte_prestamos_por_retornar(prestamos):
 
         print("=" * 80)
 
-        export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n"))
+        export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n 4.No deseo exportarlo"))
         if export_opcion == 1:
             export_csv_prestamos_retornar(prestamos, fecha_inicial, fecha_final)
         elif export_opcion == 2:
@@ -593,7 +594,7 @@ def export_csv_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, n
         prestamos_filtrados = [
             (folio, datos["Clave_unidad"], datos["Clave_cliente"], datos["Fecha_prestamo"], datos["Fecha_retorno"])
             for folio, datos in prestamos.items()
-            if not datos["Retorno"] and fecha_prestamo <= datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date() <= fecha_de_retorno
+            if fecha_prestamo <= datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date() <= fecha_de_retorno
         ]
 
         if prestamos_filtrados:
@@ -642,6 +643,8 @@ def prestamos_por_periodo():
             elif export_opcion == 3:
                 export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
                 export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
+            elif export_opcion == 4:
+                return False
             else:
                 print("Elige una opción válida (1, 2 o 3).")
     else: 
