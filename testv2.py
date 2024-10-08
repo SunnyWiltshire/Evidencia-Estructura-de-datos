@@ -6,11 +6,11 @@ unidades = {}
 clientes = {}
 prestamos = {}
 ruta = []
-#funcion que despliega el menu principal
+
 def mostrar_ruta():
     print('\nRUTA: ')
     print(" > ".join(ruta))
-
+#funcion que despliega el menu principal
 def menu_principal():
     ruta.append('Menu Principal')
     while True:
@@ -116,12 +116,7 @@ def registro_Unidad():
                 try:
                     rodada = int(entrada)
                     if rodada in [20, 26, 29]:
-                        print("""\nTenemos disponibles los siguientes colores: 
-Rojo
-Azul
-Amarillo
-Verde
-Rosa""")
+                        print("""\nTenemos disponibles los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")
                         color = input("Elige un color para la bicicleta: ").upper()
                         if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
                             print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
@@ -152,8 +147,8 @@ Rosa""")
 def export_unidades_auto(unidades):
     with open("Unidades_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
         grabador = csv.writer(archivocsv_unidades)
-        grabador.writerow(("Clave", "Rodada"))
-        grabador.writerows([(clave, rodada) for clave, rodada in unidades.items()])
+        grabador.writerow(("Clave", "Rodada", "Color"))
+        grabador.writerows([(clave, datos[0], datos[1]) for clave, datos in unidades.items()])
 
 ## Lee las unidades para no perder los datos
 def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
@@ -161,13 +156,13 @@ def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
     try:
         with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_unidades:
             lector = csv.reader(archivocsv_unidades)
-            next(lector)
+            next(lector) 
             for fila in lector:
-                clave, rodada = fila
-                unidades[int(clave)] = (rodada)
+                clave, rodada, color = fila 
+                unidades[int(clave)] = (int(rodada), color) 
     except FileNotFoundError:
         print("El archivo de unidades no existe. Se creará uno nuevo al exportar.")
-    return unidades            
+    return unidades     
 
 ## FUNCIONES PARA EL REGISTRO DE UN CLIENTE
 
@@ -362,7 +357,7 @@ def tab_prestamos(clientes, unidades):
     # Iterar sobre clientes y asociar unidades, si las claves coinciden
     for clave_cliente, datos_cliente in clientes.items():
         if clave_cliente in unidades:
-            rodada = unidades[clave_cliente]
+            rodada, _ = unidades[clave_cliente]  # Descomponemos la tupla
             print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^41}{clave_cliente:^20}{rodada:^10}")
         else:
             print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^41}{'Sin unidad':^20}{'N/A':^10}")
