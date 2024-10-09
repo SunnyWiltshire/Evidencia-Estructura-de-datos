@@ -2,6 +2,10 @@ import csv
 from datetime import datetime, timedelta
 import openpyxl
 from openpyxl.styles import Font 
+import pandas as pd
+import numpy as np
+from scipy import stats
+
 unidades = {}
 clientes = {}
 prestamos = {}
@@ -19,7 +23,7 @@ def menu_principal():
         print("1. Registro")
         print("2. Prestamo")
         print("3. Retorno")
-        print("4. Reportes")
+        print("4. Informes")
         print("5. Salir\n")
 
         try:
@@ -39,8 +43,8 @@ def menu_principal():
                 menu_retorno()
                 ruta.pop()
             elif opcion == 4:
-                ruta.append("Reportes")
-                submenu_reportes()
+                ruta.append("Informes")
+                menu_informes()
                 ruta.pop()
             elif opcion == 5:
                 confirmacion = input("¿Desea salir del programa? (S/N)").upper()
@@ -247,38 +251,77 @@ def registrar_prestamo():
             if opcion == "S":
                 print("\n--- REGISTRO DE PRÉSTAMO ---")
 
-                fecha_actual = datetime.now().date()
-                folio = max(prestamos, default=0) + 1
+            fecha_actual = datetime.now().date()
+            folio = max(prestamos, default=0) + 1
 
-                # Captura de la clave de la unidad
-                while True:
-                    Clave_unidad = input("Clave de la unidad: ")
-                    try:
-                        Clave_unidad = int(Clave_unidad)
-                        if Clave_unidad in unidades:
-                            break
-                        else:
-                            print("La clave de la unidad no es válida.")
-                            if cancelar():
-                                return
-                    except ValueError:
-                        if cancelar():
-                            return
-        
-                # Captura de la clave del cliente
-                while True:
-                    Clave_cliente = input("Clave del cliente: ")
-                    try:
-                        Clave_cliente = int(Clave_cliente)
-                        if Clave_cliente in clientes:
-                            break
-                        else:
-                            print("La clave del cliente no es válida.")
-                            if cancelar():
-                                return
-                    except ValueError:
-                        if cancelar():
-                            return
+            # Captura de la clave de la unidad
+            while True:
+                Clave_unidad = input("Clave de la unidad: ")
+                if Clave_unidad.isdigit() and int(Clave_unidad) in unidades:
+                    Clave_unidad = int(Clave_unidad)
+                    break
+                print("La clave de la unidad no es válida o no es un número.")
+                if cancelar(): return
+
+            # Captura de la clave del cliente
+            while True:
+                Clave_cliente = input("Clave del cliente: ")
+                if Clave_cliente.isdigit() and int(Clave_cliente) in clientes:
+                    Clave_cliente = int(Clave_cliente)
+                    break
+                print("La clave del cliente no es válida o no es un número.")
+                if cancelar(): return
+
+            # Elección de la fecha del préstamo
+            while True:
+                eleccion_de_fecha = input("¿Deseas que la fecha sea la del día de hoy?\n1. Sí\n2. No\nElige una opción: ")
+                if eleccion_de_fecha.isdigit():
+                    eleccion_de_fecha = int(eleccion_de_fecha)
+                    if eleccion_de_fecha == 1:
+                        fecha_prestamo = fecha_actual
+                        break
+                    elif eleccion_de_fecha == 2:
+                        while True:
+                            fecha_a_elegir = input("Indica la fecha del préstamo (MM/DD/AAAA): ")
+                            try:
+                                fecha_prestamo = datetime.strptime(fecha_a_elegir, "%m/%d/%Y").date()
+                                if fecha_prestamo >= fecha_actual:
+                                    break
+                                print("La fecha no puede ser anterior a la actual.")
+                            except ValueError:
+                                print("Formato de fecha incorrecto, intenta de nuevo.")
+                        break
+                print("Opción inválida, intenta de nuevo.")
+                if cancelar(): return
+
+            # Cantidad de días del préstamo
+            while True:
+                Cantidad_de_dias = input("¿Cuántos días de préstamo solicitas?: ")
+                if Cantidad_de_dias.isdigit() and int(Cantidad_de_dias) > 0:
+                    Cantidad_de_dias = int(Cantidad_de_dias)
+                    fecha_de_retorno = fecha_prestamo + timedelta(days=Cantidad_de_dias)
+                    print(f"La fecha en la que se debe de regresar la unidad es el: {fecha_de_retorno.strftime('%m/%d/%Y')}")
+                    break
+                print("La cantidad de días debe ser un número mayor a 0.")
+                if cancelar(): return
+
+            # Registro del préstamo
+            prestamos[folio] = {
+                'Clave_cliente': Clave_cliente,
+                'Clave_unidad': Clave_unidad,
+                'Fecha_prestamo': fecha_prestamo.strftime("%m/%d/%Y"),
+                'Fecha_retorno': fecha_de_retorno.strftime('%m/%d/%Y'),
+                'Cantidad_dias': Cantidad_de_dias,
+                'Retorno': False
+            }
+
+            print(f"Préstamo registrado exitosamente. Folio: {folio}, Cliente: {Clave_cliente}, Unidad: {Clave_unidad}, Fecha de Préstamo: {fecha_prestamo}")
+            export_prestamos_auto(prestamos)
+            break
+        elif opcion == "N":
+            break
+        else:
+            print("Opción inválida. Debes ingresar 'S' o 'N'.")
 
                 # Elección de la fecha del préstamo
                 while True:
@@ -368,7 +411,7 @@ def tab_prestamos(clientes, unidades):
 def export_prestamos_auto(prestamos):
     with open("Prestamos_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_prestamo:
         grabador = csv.writer(archivocsv_prestamo)
-        grabador.writerow(("Folio", "Clave Cliente", "Clave Unidad", "Fecha préstamo","Retorno"))
+        grabador.writerow(("Folio", "Clave Cliente", "Clave Unidad", "Fecha préstamo", "Fecha retorno", "Cantidad_días", "Retorno"))
         grabador.writerows([
             (
                 folio,
@@ -376,10 +419,12 @@ def export_prestamos_auto(prestamos):
                 datos['Clave_unidad'],
                 datos['Fecha_prestamo'],
                 datos['Fecha_retorno'],
+                datos['Cantidad_dias'],
                 datos['Retorno']
             )
             for folio, datos in prestamos.items()
         ])
+
     
 ## Lee los préstamos para no perder los datos
 def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
@@ -387,13 +432,20 @@ def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
     try:
         with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_prestamos:
             lector = csv.reader(archivocsv_prestamos)
-            next(lector)
             for fila in lector:
-                folio, Clave_cliente, Clave_unidad, Fecha_prestamo,Fecha_de_retorno, Retorno = fila
-                prestamos[int(folio)] = {'Clave_cliente': Clave_cliente, 'Clave_unidad': Clave_unidad, 'Fecha_prestamo': Fecha_prestamo, 'Fecha_retorno': Fecha_de_retorno, 'Retorno': Retorno}
+                folio, Clave_cliente, Clave_unidad, Fecha_prestamo, Fecha_de_retorno, Cantidad_dias, Retorno = fila
+                prestamos[int(folio)] = {
+                    'Clave_cliente': Clave_cliente,
+                    'Clave_unidad': Clave_unidad,
+                    'Fecha_prestamo': Fecha_prestamo,
+                    'Fecha_retorno': Fecha_de_retorno,
+                    'Cantidad_dias': Cantidad_dias,  
+                    'Retorno': Retorno
+                }
     except FileNotFoundError:
         print("El archivo de préstamos no existe. Se creará uno nuevo al exportar.")
     return prestamos
+
 
 ## MENU DE RETORNO        
 #Función que despliega menú para hacer el retorno de la unidad
@@ -429,16 +481,41 @@ def menu_retorno():
     else:
       print("No hay ningún prestamo realizado.")
 
+## MENU INFORMES
+def menu_informes():
+    while True:
+        print("\n--- MENÚ INFORMES ---")
+        print("1. Reportes")
+        print("2. Análisis")
+        print("3. Volver al menú\n")
+
+        try:
+            opcion = input("Elige una de las siguientes opciones: ")
+            opcion = int(opcion)
+
+            if opcion == 1:
+                submenu_reportes()
+            elif opcion == 2:
+                submenu_analisis()
+            elif opcion == 3:
+                return False
+            else:
+                print("Opción invalida, intentalo de nuevo.")
+        except ValueError:
+            print('Favor de ingresar un valor numerico')
+
 ## MENU DE REPORTES
 def submenu_reportes():
 
   while True:
     mostrar_ruta()
     print("\n--- SUBMENÚ REPORTES ---")
-    print("1. Clientes")
-    print("2. préstamos por retornar")
-    print("3. préstamos por periodo")
-    print("4. Salir al menú principal\n")
+    print("1. Clientes.")
+    print("2. Listado de unidades.")
+    print("3. Retrasos.")
+    print("4. préstamos por retornar.")
+    print("5. préstamos por periodo.")
+    print("6. Salir al menú principal\n")
 
     try:
       reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
@@ -555,6 +632,47 @@ def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
     ajustar_ancho_columnas(hoja)
     libro.save(name_excel)
     print(f"Datos exportados con éxito en {name_excel}")
+
+## SUBMENU LISTADO DE UNIDADES
+def listado_unidades():
+    while True:
+        print("\n--- LISTADO DE UNIDADES ---")
+        print("1. Completo")
+        print("2. Por rodada")
+        print("3. Por color")
+        print("4. Volver al menú de listado de unidades\n")
+
+        try:
+            opcion = input("Elige una de las siguientes opciones: ")
+            opcion = int(opcion)
+
+            if opcion == 1:
+                analisis_completo()
+            elif opcion == 2:
+                analisis_rodada()
+            elif opcion == 3:
+                analisis_color()
+            elif opcion == 4:
+                return False
+            else:
+                print("Opción invalida, intentalo de nuevo.")
+        except ValueError:
+            print('Favor de ingresar un valor numerico')
+
+## SUBMENU RETRASOS
+def retrasos():
+    print('print pa q no de error, favor d borrar')
+## SUBMENU ANÁLISIS COMPLETO
+def analisis_completo():
+    print('lolol')
+
+## SUBMENU ANÁLISIS POR RODADA
+def analisis_rodada():
+    print('lolol')
+
+## SUBMENU ANÁLISIS POR COLOR
+def analisis_color():
+    print('lolol')
 
 ## SUBMENU REPORTES PRÉSTAMOS POR RETORNAR
 def reporte_prestamos_por_retornar(prestamos):
@@ -796,7 +914,71 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
             if cancelar():
                 return False
 
-        
+##Submenú analísis
+def submenu_analisis():
+    while True:
+        print("\n--- SUBMENÚ ANÁLISIS ---")
+        print("1. Duración de los préstamos.")
+        print("2. Ranking de clientes.")
+        print("3. Preferencias de rentas.")
+        print("4. Volver al menú\n")
+
+        try:
+            opcion = input("Elige una de las siguientes opciones: ")
+            opcion = int(opcion)
+
+            if opcion == 1:
+                duracion_prestamos(prestamos)
+            elif opcion == 2:
+                ranking_clientes()
+            elif opcion == 3:
+                preferencias_rentas()
+            elif opcion == 4:
+                return False
+            else:
+                print("Opción invalida, intentalo de nuevo.")
+        except ValueError:
+            print('Favor de ingresar un valor numerico')
+            
+## SUBMENÚ DURACIÓN DE LOS PRÉSTAMOS
+def duracion_prestamos(prestamos):
+    dias_prestamo = [prestamo['Cantidad_dias'] for prestamo in prestamos.values()]
+
+    if len(dias_prestamo) == 0:
+        print("No hay registros de préstamos para calcular estadísticas.")
+        return
+
+    df = pd.DataFrame(dias_prestamo, columns=['Días de préstamo'])
+
+    media = df['Días de préstamo'].mean()
+    mediana = df['Días de préstamo'].median()
+    #moda = stats.mode(df['Días de préstamo'])[0][0] #checare otra opcion ya que esta marcaba error, gracias.
+    minimo = df['Días de préstamo'].min()
+    maximo = df['Días de préstamo'].max()
+    desviacion_estandar = df['Días de préstamo'].std()
+    cuartiles = np.percentile(df['Días de préstamo'], [25, 50, 75])
+
+    reporte = {
+        "Media": media,
+        "Mediana": mediana,
+        #"Moda": moda, #por el momento no funciona, gracias.
+        "Mínimo": minimo,
+        "Máximo": maximo,
+        "Desviación estándar": desviacion_estandar,
+        "Cuartiles (25%, 50%, 75%)": cuartiles
+    }
+
+    for clave, valor in reporte.items():
+        print(f"{clave}: {valor}")
+
+## SUBMENÚ RANKING CLIENTES
+def ranking_clientes():
+    print('lolol')
+
+## SUBMENÚ PREFERENCIAS RENTAS
+def preferencias_rentas():
+    print('lolol')
+
 # Inicio del programa
 clientes = cargar_clientes_csv()
 unidades = cargar_unidades_csv()
