@@ -4,7 +4,6 @@ import openpyxl
 from openpyxl.styles import Font 
 import pandas as pd
 import numpy as np
-from scipy import stats
 
 unidades = {}
 clientes = {}
