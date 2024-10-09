@@ -9,9 +9,16 @@ from scipy import stats
 unidades = {}
 clientes = {}
 prestamos = {}
+ruta = []
+
+def mostrar_ruta():
+    print('\nRUTA: ')
+    print(" > ".join(ruta))
 #funcion que despliega el menu principal
 def menu_principal():
+    ruta.append('Menu Principal')
     while True:
+        mostrar_ruta()
         print("\n--- MENÚ PRINCIPAL ---")
         print("1. Registro")
         print("2. Prestamo")
@@ -24,13 +31,21 @@ def menu_principal():
             opcion = int(opcion)
 
             if opcion == 1:
+                ruta.append("Registro")
                 menu_registro()
+                ruta.pop()
             elif opcion == 2:
+                ruta.append("Prestamo")
                 registrar_prestamo()
+                ruta.pop()
             elif opcion == 3:
+                ruta.append("Retorno")
                 menu_retorno()
+                ruta.pop()
             elif opcion == 4:
+                ruta.append("Informes")
                 menu_informes()
+                ruta.pop()
             elif opcion == 5:
                 confirmacion = input("¿Desea salir del programa? (S/N)").upper()
                 if confirmacion == "S":
@@ -62,8 +77,8 @@ def cancelar():
             
 #funcion que despliega el sub menú de registro
 def menu_registro():
-
     while True:
+        mostrar_ruta()
         print("\n--- SUBMENÚ REGISTRO ---")
         print("1. Registrar una unidad")
         print("2. Registrar un cliente")
@@ -74,9 +89,13 @@ def menu_registro():
             opcion = int(opcion)
 
             if opcion == 1:
+                ruta.append('Unidad')
                 registro_Unidad()
+                ruta.pop()
             elif opcion == 2:
+                ruta.append('Cliente')
                 registro_Cliente()
+                ruta.pop()
             elif opcion == 3:
                 break
             else:
@@ -89,8 +108,8 @@ def menu_registro():
 
 #funcion que permite registrar una unidad lista para un prestamo
 def registro_Unidad():
-    
     while True:
+        mostrar_ruta()
         opcion = input("¿Deseas realizar un registro de unidad? (S/N): ").upper()
 
         if opcion == "S":
@@ -101,14 +120,21 @@ def registro_Unidad():
                 try:
                     rodada = int(entrada)
                     if rodada in [20, 26, 29]:
-                        unidades[clave] = entrada
-                        print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}")
-                        export_unidades_auto(unidades)
+                        print("""\nTenemos disponibles los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")
+                        color = input("Elige un color para la bicicleta: ").upper()
+                        if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
+                            print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
+                            unidades[clave] = (entrada, color)
+                            export_unidades_auto(unidades)
+                        else: 
+                            if cancelar():
+                                return
                         return False
                     else:
                         print("Por favor, ingrese un valor valido (20, 26 o 29).")
                         if cancelar():
                             break
+                    
                 except ValueError:
                     if cancelar():
                         break
@@ -117,14 +143,16 @@ def registro_Unidad():
             return False
         else:
             print("Opción inválida. Debes ingresar 'S' o 'N'.")
+            if cancelar():
+                break
             return
 
 ## Exporta automaticamente las unidades para su lectura
 def export_unidades_auto(unidades):
     with open("Unidades_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
         grabador = csv.writer(archivocsv_unidades)
-        grabador.writerow(("Clave", "Rodada"))
-        grabador.writerows([(clave, rodada) for clave, rodada in unidades.items()])
+        grabador.writerow(("Clave", "Rodada", "Color"))
+        grabador.writerows([(clave, datos[0], datos[1]) for clave, datos in unidades.items()])
 
 ## Lee las unidades para no perder los datos
 def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
@@ -132,19 +160,20 @@ def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
     try:
         with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_unidades:
             lector = csv.reader(archivocsv_unidades)
-            next(lector)
+            next(lector) 
             for fila in lector:
-                clave, rodada = fila
-                unidades[int(clave)] = (rodada)
+                clave, rodada, color = fila 
+                unidades[int(clave)] = (int(rodada), color) 
     except FileNotFoundError:
         print("El archivo de unidades no existe. Se creará uno nuevo al exportar.")
-    return unidades            
+    return unidades     
 
 ## FUNCIONES PARA EL REGISTRO DE UN CLIENTE
 
 #funcion que permite registrar un cliente listo para solicitar un prestamo           
 def registro_Cliente():
     while True:
+        mostrar_ruta()
         opcion = input("¿Deseas realizar un registro de cliente? (S/N): ").upper()
 
         if opcion == "S":
@@ -215,11 +244,12 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
 ## Apartado para registrar los préstamos
 def registrar_prestamo():
     while True:
-        tab_prestamos(clientes, unidades)
-        opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
-        
-        if opcion == "S":
-            print("\n--- REGISTRO DE PRÉSTAMO ---")
+            mostrar_ruta()
+            tab_prestamos(clientes, unidades)
+            opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
+            
+            if opcion == "S":
+                print("\n--- REGISTRO DE PRÉSTAMO ---")
 
             fecha_actual = datetime.now().date()
             folio = max(prestamos, default=0) + 1
@@ -293,7 +323,74 @@ def registrar_prestamo():
         else:
             print("Opción inválida. Debes ingresar 'S' o 'N'.")
 
+                # Elección de la fecha del préstamo
+                while True:
+                    eleccion_de_fecha = input("¿Deseas que la fecha sea la del día de hoy?\n1. Sí\n2. No\nElige una opción: ")
+                    try:
+                        eleccion_de_fecha = int(eleccion_de_fecha)
+                        if eleccion_de_fecha == 1:
+                            fecha_prestamo = fecha_actual
+                            break
+                        elif eleccion_de_fecha == 2:
+                            while True:
+                                fecha_a_elegir = input("Indica la fecha del préstamo (MM/DD/AAAA): ")
+                                try:
+                                    fecha_prestamo = datetime.strptime(fecha_a_elegir, "%m/%d/%Y").date()
+                                    if fecha_prestamo >= fecha_actual:
+                                        break
+                                    else:
+                                        print("La fecha no puede ser anterior a la actual.")
+                                        if cancelar():
+                                            break
+                                except ValueError:
+                                    print("Formato de fecha incorrecto, intenta de nuevo.")
+                                    if cancelar():
+                                        break
+                            break
+                        else:
+                            print("Opción inválida, intenta de nuevo.")
+                            if cancelar():
+                                break
+                    except ValueError:
+                        print("Entrada inválida, elige 1 o 2.")
+                        if cancelar():
+                            break
+                # Cantidad de días del prestamo
+                while True:
+                    Cantidad_de_dias = input("¿Cuantos dias de prestamo solicitas?: ")
+                    try:
+                        Cantidad_de_dias = int(Cantidad_de_dias)
+                        if Cantidad_de_dias > 0:
+                            fecha_de_retorno = fecha_prestamo + timedelta(days=Cantidad_de_dias)
+                            print(f"La fecha en la que se debe de regresar la unidad es el: {fecha_de_retorno.strftime('%m/%d/%Y')}")
+                            break
+                        else:
+                            print("La cantidad de dias debe ser mayor a 0.")
+                            if cancelar():
+                                break
+                    except ValueError:
+                        if cancelar():
+                            break
+                        
+                # Registro del préstamo
+                prestamos[folio] = {
+                    'Clave_cliente': Clave_cliente,
+                    'Clave_unidad': Clave_unidad,
+                    'Fecha_prestamo': fecha_prestamo.strftime("%m/%d/%Y"),
+                    'Fecha_retorno': fecha_de_retorno.strftime('%m/%d/%Y'),
+                    "Retorno": False
+                }
 
+                print(f"Préstamo registrado exitosamente. Folio: {folio}, Cliente: {Clave_cliente}, Unidad: {Clave_unidad}, Fecha de Préstamo: {fecha_prestamo}")
+                export_prestamos_auto(prestamos)
+                break
+            elif opcion == "N":
+                # Regresar al menú si elige 'N'
+                break
+            else:
+                print("Opción inválida. Debes ingresar 'S' o 'N'.")
+                if cancelar():
+                    break
 
 ## Impresión tabular que muestra los clientes y unidades al momento de realizar un préstamo
 def tab_prestamos(clientes, unidades):
@@ -303,7 +400,7 @@ def tab_prestamos(clientes, unidades):
     # Iterar sobre clientes y asociar unidades, si las claves coinciden
     for clave_cliente, datos_cliente in clientes.items():
         if clave_cliente in unidades:
-            rodada = unidades[clave_cliente]
+            rodada, _ = unidades[clave_cliente]  # Descomponemos la tupla
             print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^41}{clave_cliente:^20}{rodada:^10}")
         else:
             print(f"{clave_cliente:^15}{datos_cliente[1] + ' ' + datos_cliente[0]:^41}{'Sin unidad':^20}{'N/A':^10}")
@@ -353,6 +450,7 @@ def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
 ## MENU DE RETORNO        
 #Función que despliega menú para hacer el retorno de la unidad
 def menu_retorno():
+    mostrar_ruta()
     if prestamos:
       print("\n--- SUBMENÚ RETORNO ---")
       while True:
@@ -371,8 +469,12 @@ def menu_retorno():
                           break
                       else:
                           print("El número de folio no existe. Por favor, inténtalo de nuevo.")
+                          if cancelar():
+                            break
                   except ValueError:
                       print("Por favor, ingrese un número entero.")
+                      if cancelar():
+                        break
                 break
           elif opcion == "2":
               break
@@ -406,6 +508,7 @@ def menu_informes():
 def submenu_reportes():
 
   while True:
+    mostrar_ruta()
     print("\n--- SUBMENÚ REPORTES ---")
     print("1. Clientes.")
     print("2. Listado de unidades.")
@@ -415,26 +518,31 @@ def submenu_reportes():
     print("6. Salir al menú principal\n")
 
     try:
-        reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
-        if reporte_opcion == 1:
-            exportar_clientes()
-        elif reporte_opcion == 2:
-            listado_unidades()
-        elif reporte_opcion == 3:
-            retrasos()
-        elif reporte_opcion == 4:
-            reporte_prestamos_por_retornar(prestamos)
-        elif reporte_opcion == 5:
-            prestamos_por_periodo()
-        elif reporte_opcion == 6:
-            return False
-        else:
-            print("Ingresa una opción válida")
+      reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
+      if reporte_opcion == 1:
+        ruta.append('Exportar Clientes')
+        exportar_clientes()
+        ruta.pop()
+      elif reporte_opcion == 2:
+        ruta.append('Prestamos por retornar')
+        reporte_prestamos_por_retornar(prestamos)
+        ruta.pop()
+      elif reporte_opcion == 3:
+        ruta.append('Prestamos por periodo')
+        prestamos_por_periodo()
+        ruta.pop()
+      elif reporte_opcion == 4:
+        return False
+      else:
+        print("Ingresa una opción válida")
     except Exception as error_name:
         print(f"Ha ocurrido un error: {error_name}")
+        if cancelar():
+            break
 
 ## SUBMENU REPORTES CLIENTES
 def exportar_clientes():
+    mostrar_ruta()
     while True:
         if clientes:
             tab_clientes(clientes)
@@ -451,10 +559,16 @@ def exportar_clientes():
                     break
                 else:
                     print("Elige una opcion valida")
+                    if cancelar():
+                        break
             except ValueError:
                     print("Error: Debes ingresar un número entero que sea válido.")
+                    if cancelar():
+                        break
             except Exception as name_error:
                     print(f"Ha ocurrido un error inesperado: {name_error}")
+                    if cancelar():
+                        break
             else:
                 print("No hay clientes para exportar")
                 break
@@ -564,12 +678,16 @@ def analisis_color():
 def reporte_prestamos_por_retornar(prestamos):
     if prestamos:
         while True:
+            mostrar_ruta()
             try:
-                fecha_inicial = input("Ingresa la fecha inicial (MM/DD/AAAA): ")
+                fecha_inicial = input("\nIngresa la fecha inicial (MM/DD/AAAA): ")
                 fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
                 break
             except ValueError:
                 print("Formato de fecha incorrecto, intenta de nuevo.")
+                if cancelar():
+                    break
+
         
         while True:
             try:
@@ -579,8 +697,12 @@ def reporte_prestamos_por_retornar(prestamos):
                     break
                 else:
                     print("La fecha final debe ser posterior o igual a la fecha inicial.")
+                    if cancelar():
+                        break
             except ValueError:
                 print("Formato de fecha incorrecto, intenta de nuevo.")
+                if cancelar():
+                    break
                 
         print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
         print("=" * 80)
@@ -606,7 +728,9 @@ def reporte_prestamos_por_retornar(prestamos):
         elif export_opcion == 4:
             return False
         else:
-            print("Elige una opción válida (1, 2 o 3).")
+            print("Elige una opción válida (1, 2, 3 o 4).")
+            if cancelar():
+                return False
     else:
         print("No se encontró ningún préstamo.")
 
@@ -668,12 +792,15 @@ def export_csv_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, n
 def prestamos_por_periodo():
     if prestamos:
             while True:
+                mostrar_ruta()
                 try:
-                    fecha_inicial = input("Ingresa la fecha inicial del periodo (MM/DD/AAAA): ")
+                    fecha_inicial = input("\nIngresa la fecha inicial del periodo (MM/DD/AAAA): ")
                     fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
                     break
                 except ValueError:
                     print("Formato de fecha incorrecto, intenta de nuevo.")
+                    if cancelar():
+                        break
 
             while True:
                 try:
@@ -683,8 +810,12 @@ def prestamos_por_periodo():
                         break
                     else:
                         print("La fecha final debe ser posterior o igual a la fecha inicial.")
+                        if cancelar():
+                            break
                 except ValueError:
                     print("Formato de fecha incorrecto, intenta de nuevo.")
+                    if cancelar():
+                        break
 
             print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
             print("=" * 80)
@@ -707,7 +838,9 @@ def prestamos_por_periodo():
             elif export_opcion == 4:
                 return False
             else:
-                print("Elige una opción válida (1, 2 o 3).")
+                print("Elige una opción válida (1, 2, 3 o 4).")
+                if cancelar():
+                    return False
     else: 
         print("No hay préstamos para realizar un reporte")
 
@@ -778,6 +911,8 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
             print(f"Datos exportados con éxito en {nombre_csv}")
         else:
             print("No hay préstamos que coincidan con los criterios especificados.")
+            if cancelar():
+                return False
 
 ##Submenú analísis
 def submenu_analisis():
