@@ -8,11 +8,6 @@ import numpy as np
 unidades = {}
 clientes = {}
 prestamos = {}
-ruta = []
-#hla piyuta
-def mostrar_ruta():
-    print('\nRUTA: ')
-    print(" > ".join(ruta))
 #funcion que despliega el menu principal
 def menu_principal():
     ruta.append('Menu Principal')
@@ -172,8 +167,6 @@ def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
 #funcion que permite registrar un cliente listo para solicitar un prestamo           
 def registro_Cliente():
     while True:
-        mostrar_ruta()
-
         opcion = input("¿Deseas realizar un registro de cliente? (S/N): ").upper()
 
         if opcion == "S":
@@ -244,8 +237,6 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
 ## Apartado para registrar los préstamos
 def registrar_prestamo():
     while True:
-
-            mostrar_ruta()
             tab_prestamos(clientes, unidades)
             opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
             

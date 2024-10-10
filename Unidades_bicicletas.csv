@@ -1,14 +1,16 @@
-Clave,Rodada
-1,"('20','AMARILLO')"
-2,"('26','AZUL')"
-3,"('29','ROJO')"
-4,"('20','VERDE')"
-5,"('20','ROSA')"
-6,"('29','AMARILLO')"
-7,"('26','VERDE')"
-8,"('29','ROSA')"
-9,"('26','AZUL')"
-10,"('29', 'VERDE')"
-11,"('26', 'ROJO')"
-12,"('29', 'ROSA')"
-13,"('29', 'AZUL')"
+Clave,Rodada,Color
+1,20,AMARILLO
+2,26,AZUL
+3,29,ROJO
+4,20,VERDE
+5,20,ROSA
+6,29,AMARILLO
+7,26,VERDE
+8,29,ROSA
+9,26,AZUL
+10,29,VERDE
+11,26,ROJO
+12,29,ROSA
+13,29,AZUL
+14,20,ROJO
+15,26,VERDE
