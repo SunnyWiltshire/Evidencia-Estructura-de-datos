@@ -920,20 +920,21 @@ def duracion_prestamos(prestamos):
 
 #cargar rentas
 def cargar_rentas_csv():
+    rentas = {}
     try:
-        df = pd.read_csv('rentas.csv')
-        rentas = {}
-        for index, row in df.iterrows():
-            clave_cliente = row['Clave_cliente']
-            cantidad_rentas = row['Cantidad_rentas']
-            rentas[clave_cliente] = cantidad_rentas
-        return rentas
+        with open('rentas.csv', mode='r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Saltar la fila de encabezados
+            for row in reader:
+                clave_cliente = int(row[0])
+                cantidad_rentas = int(row[1])
+                rentas[clave_cliente] = cantidad_rentas
+        print("Rentas cargadas correctamente.")
     except FileNotFoundError:
-        print("El archivo 'rentas.csv' no se encontró. Se inicializarán rentas vacías.")
-        return {}
+        print("Archivo de rentas no encontrado. Se inicializará una lista vacía.")
     except Exception as e:
-        print(f"Ocurrió un error al cargar las rentas: {e}")
-        return {}
+        print(f"Error al cargar rentas: {e}")
+    return rentas
     
 #guardar rentas
 def guardar_rentas_csv(rentas):
@@ -951,47 +952,42 @@ def guardar_rentas_csv(rentas):
 
 # Función para generar el ranking de clientes
 def ranking_clientes(prestamos, clientes, rentas):
-    # Crear una estructura para el ranking
     ranking_data = {
+        'Cantidad_rentas': [],
         'Clave_cliente': [],
         'Nombre_completo': [],
-        'Cantidad_rentas': []
+        'Teléfono': []
     }
 
-    # Calcular las rentas para cada cliente
-    for folio, prestamo in prestamos.items():
-        clave_cliente = prestamo['Clave_cliente']
-        # Verifica si el cliente tiene rentas registradas
-        cantidad_rentas = rentas.get(clave_cliente, 0)
+    # Contar las rentas acumuladas por cada cliente
+    for clave_cliente, cantidad_rentas in rentas.items():
+        if clave_cliente in clientes:
+            cliente = clientes[clave_cliente]
+            apellidos, nombre, telefono = cliente  # Desempaquetar la tupla
 
-        if clave_cliente not in ranking_data['Clave_cliente']:
-            # Obtener el nombre completo del cliente
-            cliente = clientes.get(clave_cliente, (None, None, None))
-            if cliente:
-                ranking_data['Clave_cliente'].append(clave_cliente)
-                ranking_data['Nombre_completo'].append(f"{cliente[1]} {cliente[0]}")  # Nombre y Apellido
-                ranking_data['Cantidad_rentas'].append(cantidad_rentas)
+            ranking_data['Cantidad_rentas'].append(cantidad_rentas)
+            ranking_data['Clave_cliente'].append(clave_cliente)
+            ranking_data['Nombre_completo'].append(f"{nombre} {apellidos}")
+            ranking_data['Teléfono'].append(telefono)
 
-    # Mostrar el ranking
+    # df para ordenar los resultados
+    df_ranking = pd.DataFrame(ranking_data)
+    df_ranking.sort_values(by='Cantidad_rentas', ascending=False, inplace=True)
+
+    # ranking con formato de tabla
     print("\n--- RANKING DE CLIENTES ---")
-    print(f"{'Clave':<10} {'Nombre Completo':<40} {'Cantidad de Rentas':<20}")
-    print("-" * 70)
-    for i in range(len(ranking_data['Clave_cliente'])):
-        print(f"{ranking_data['Clave_cliente'][i]:<10} {ranking_data['Nombre_completo'][i]:<40} {ranking_data['Cantidad_rentas'][i]:<20}")
+    print(f"{'Posición':<10} {'Clave Cliente':<15} {'Nombre Completo':<30} {'Teléfono':<15} {'Cantidad de Rentas':<20}")
+    print("=" * 90)
+    for i, row in enumerate(df_ranking.itertuples(index=False), 1):
+        print(f"{i:<10} {row.Clave_cliente:<15} {row.Nombre_completo:<30} {row.Teléfono:<15} {row.Cantidad_rentas:<20}")
+    
+    guardar_rentas_csv(rentas)
+    guardar_ranking_csv(df_ranking)
 
-    # Guardar el ranking en un archivo CSV (opcional)
-    guardar_ranking_csv(ranking_data)
 
-def guardar_ranking_csv(ranking_data):
-    with open('ranking_clientes.csv', mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Clave_cliente', 'Nombre_completo', 'Cantidad_rentas'])  # Encabezados
-        for i in range(len(ranking_data['Clave_cliente'])):
-            writer.writerow([
-                ranking_data['Clave_cliente'][i],
-                ranking_data['Nombre_completo'][i],
-                ranking_data['Cantidad_rentas'][i]
-            ])
+def guardar_ranking_csv(df_ranking):
+    df_ranking.to_csv("Ranking_clientes.csv", index=False, encoding="latin1")
+    print("Ranking de clientes exportado exitosamente en 'Ranking_clientes.csv'.")
 
 ## SUBMENÚ PREFERENCIAS RENTAS
 def preferencias_rentas():
