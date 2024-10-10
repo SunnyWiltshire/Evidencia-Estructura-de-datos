@@ -13,6 +13,11 @@ ruta = []
 def mostrar_ruta():
     print('\nRUTA: ')
     print(" > ".join(ruta))
+ruta = []
+
+def mostrar_ruta():
+    print('\nRUTA: ')
+    print(" > ".join(ruta))
 #funcion que despliega el menu principal
 def menu_principal():
     ruta.append('Menu Principal')
@@ -396,12 +401,12 @@ def export_prestamos_auto(prestamos):
 
     
 ## Lee los préstamos para no perder los datos
-'''
 def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
     prestamos = {}
     try:
         with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_prestamos:
             lector = csv.reader(archivocsv_prestamos)
+            next(lector)
             for fila in lector:
                 folio, Clave_cliente, Clave_unidad, Fecha_prestamo, Fecha_de_retorno, Cantidad_dias, Retorno = fila
                 prestamos[int(folio)] = {
@@ -415,9 +420,7 @@ def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
     except FileNotFoundError:
         print("El archivo de préstamos no existe. Se creará uno nuevo al exportar.")
     return prestamos
-'''
-
-## MENU DE RETORNO        
+       
 #Función que despliega menú para hacer el retorno de la unidad
 def menu_retorno():
     mostrar_ruta()
@@ -454,6 +457,8 @@ def menu_retorno():
 ## MENU INFORMES
 def menu_informes():
     while True:
+        mostrar_ruta()
+
         print("\n--- MENÚ INFORMES ---")
         print("1. Reportes")
         print("2. Análisis")
@@ -464,9 +469,13 @@ def menu_informes():
             opcion = int(opcion)
 
             if opcion == 1:
+                ruta.append('Reportes')
                 submenu_reportes()
+                ruta.pop()
             elif opcion == 2:
+                ruta.append('Analisis')
                 submenu_analisis()
+                ruta.pop()
             elif opcion == 3:
                 return False
             else:
@@ -488,25 +497,31 @@ def submenu_reportes():
     print("6. Salir al menú principal\n")
 
     try:
-      reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
-      if reporte_opcion == 1:
-        ruta.append('Exportar Clientes')
-        exportar_clientes()
-        ruta.pop()
-      elif reporte_opcion == 2: 
-        listado_unidades()
-      elif reporte_opcion == 4:
-        ruta.append('Prestamos por retornar')
-        reporte_prestamos_por_retornar(prestamos)
-        ruta.pop()
-      elif reporte_opcion == 3:
-        ruta.append('Prestamos por periodo')
-        prestamos_por_periodo()
-        ruta.pop()
-      elif reporte_opcion == 4:
-        return False
-      else:
-        print("Ingresa una opción válida")
+        reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
+        if reporte_opcion == 1:
+            ruta.append('Exportar Clientes')
+            exportar_clientes()
+            ruta.pop()
+        elif reporte_opcion == 2:
+            ruta.append('Listado de Unidades')
+            listado_unidades()
+            ruta.pop()
+        elif reporte_opcion == 3:
+            ruta.append('Retrasos')
+            retrasos()
+            ruta.pop()
+        elif reporte_opcion == 4:
+            ruta.append('Prestamos por retornar')
+            reporte_prestamos_por_retornar(prestamos)
+            ruta.pop()
+        elif reporte_opcion == 5:
+            ruta.append('Prestamos por periodo')
+            prestamos_por_periodo()
+            ruta.pop()
+        elif reporte_opcion == 6:
+            return False
+        else:
+            print("Ingresa una opción válida")
     except Exception as error_name:
         print(f"Ha ocurrido un error: {error_name}")
         if cancelar():
@@ -608,6 +623,8 @@ def export_excel_clientes(clientes, name_excel="Clientes.xlsx"):
 ## SUBMENU LISTADO DE UNIDADES
 def listado_unidades():
     while True:
+        mostrar_ruta()
+
         print("\n--- LISTADO DE UNIDADES ---")
         print("1. Completo")
         print("2. Por rodada")
@@ -878,6 +895,8 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
 ##Submenú analísis
 def submenu_analisis():
     while True:
+        mostrar_ruta()
+
         print("\n--- SUBMENÚ ANÁLISIS ---")
         print("1. Duración de los préstamos.")
         print("2. Ranking de clientes.")
@@ -943,6 +962,6 @@ def preferencias_rentas():
 # Inicio del programa
 clientes = cargar_clientes_csv()
 unidades = cargar_unidades_csv()
-#prestamos = cargar_prestamos_csv()
+prestamos = cargar_prestamos_csv()
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
 menu_principal()
