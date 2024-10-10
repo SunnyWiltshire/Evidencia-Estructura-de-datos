@@ -9,11 +9,10 @@ unidades = {}
 clientes = {}
 prestamos = {}
 ruta = []
-
+#hla piyuta
 def mostrar_ruta():
     print('\nRUTA: ')
     print(" > ".join(ruta))
-#HOLA IAN DIME SI ESTO TE APARECE
 #funcion que despliega el menu principal
 def menu_principal():
     ruta.append('Menu Principal')
