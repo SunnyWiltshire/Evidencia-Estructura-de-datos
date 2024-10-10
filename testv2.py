@@ -8,6 +8,11 @@ import numpy as np
 unidades = {}
 clientes = {}
 prestamos = {}
+ruta = []
+
+def mostrar_ruta():
+    print('\nRUTA: ')
+    print(" > ".join(ruta))
 #funcion que despliega el menu principal
 def menu_principal():
     ruta.append('Menu Principal')
@@ -118,7 +123,7 @@ def registro_Unidad():
                         color = input("Elige un color para la bicicleta: ").upper()
                         if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
                             print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
-                            unidades[clave] = (entrada, color)
+                            unidades[clave] = {entrada, color}
                             export_unidades_auto(unidades)
                         else: 
                             if cancelar():
@@ -140,6 +145,49 @@ def registro_Unidad():
             if cancelar():
                 break
             return
+#funcion de listado de unidades completo
+def analisis_completo(unidades): 
+    print("\n Listado completo")
+    df_listado_completo = pd.DataFrame.from_dict(unidades, orient ="index")
+    print(df_listado_completo)
+
+#funcion de listado por rodada 
+def analisis_rodada(unidades): 
+    print("\n Listado por rodada")
+    while True: 
+        try: 
+            buscar_rodada = int(input("Ingresa el nuúmero de rodada que deseas buscar:"))
+            df_listado_por_rodada = pd.DataFrame.from_dict(unidades, orient = "index")
+            df_rodadas = df_listado_por_rodada[df_listado_por_rodada[0] == buscar_rodada]
+            if not df_rodadas.empty: 
+                print(df_rodadas)
+                break
+            else:
+                print("No existe el nombre que indicaste")
+        except: 
+            print("El dato ingresado no es válido, por favor ingrese un número")
+
+#funcion de listado por color
+def analisis_color(unidades):
+    print("\n Listado por color")
+    print("""\nIngresa uno de los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")    
+    while True:
+        try: 
+            buscar_color = input("Ingresa uno de los colores antes mencionados: ").upper()
+            
+            if buscar_color in ["AZUL", "AMARILLO", "ROJO", "VERDE", "ROSA",]: 
+                df_listado_por_color = pd.DataFrame.from_dict(unidades, orient="index")
+                df_color = df_listado_por_color[df_listado_por_color[1] == buscar_color]
+
+                if not df_color.empty:
+                    print(df_color) 
+                    break
+                else: 
+                    print("No hay de este color aún")
+            else: 
+                print("El color no es válido")
+        except: 
+            print("Hay algun error en el dato ingresado")
 
 ## Exporta automaticamente las unidades para su lectura
 def export_unidades_auto(unidades):
@@ -167,6 +215,7 @@ def cargar_unidades_csv(nombre_archivo="Unidades_bicicletas.csv"):
 #funcion que permite registrar un cliente listo para solicitar un prestamo           
 def registro_Cliente():
     while True:
+        mostrar_ruta()
         opcion = input("¿Deseas realizar un registro de cliente? (S/N): ").upper()
 
         if opcion == "S":
@@ -237,6 +286,7 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
 ## Apartado para registrar los préstamos
 def registrar_prestamo():
     while True:
+            mostrar_ruta()
             tab_prestamos(clientes, unidades)
             opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
             
@@ -346,6 +396,7 @@ def export_prestamos_auto(prestamos):
 
     
 ## Lee los préstamos para no perder los datos
+'''
 def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
     prestamos = {}
     try:
@@ -364,7 +415,7 @@ def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
     except FileNotFoundError:
         print("El archivo de préstamos no existe. Se creará uno nuevo al exportar.")
     return prestamos
-
+'''
 
 ## MENU DE RETORNO        
 #Función que despliega menú para hacer el retorno de la unidad
@@ -442,7 +493,9 @@ def submenu_reportes():
         ruta.append('Exportar Clientes')
         exportar_clientes()
         ruta.pop()
-      elif reporte_opcion == 2:
+      elif reporte_opcion == 2: 
+        listado_unidades()
+      elif reporte_opcion == 4:
         ruta.append('Prestamos por retornar')
         reporte_prestamos_por_retornar(prestamos)
         ruta.pop()
@@ -566,11 +619,11 @@ def listado_unidades():
             opcion = int(opcion)
 
             if opcion == 1:
-                analisis_completo()
+                analisis_completo(unidades)
             elif opcion == 2:
-                analisis_rodada()
+                analisis_rodada(unidades)
             elif opcion == 3:
-                analisis_color()
+                analisis_color(unidades)
             elif opcion == 4:
                 return False
             else:
@@ -581,17 +634,6 @@ def listado_unidades():
 ## SUBMENU RETRASOS
 def retrasos():
     print('print pa q no de error, favor d borrar')
-## SUBMENU ANÁLISIS COMPLETO
-def analisis_completo():
-    print('lolol')
-
-## SUBMENU ANÁLISIS POR RODADA
-def analisis_rodada():
-    print('lolol')
-
-## SUBMENU ANÁLISIS POR COLOR
-def analisis_color():
-    print('lolol')
 
 ## SUBMENU REPORTES PRÉSTAMOS POR RETORNAR
 def reporte_prestamos_por_retornar(prestamos):
@@ -901,6 +943,6 @@ def preferencias_rentas():
 # Inicio del programa
 clientes = cargar_clientes_csv()
 unidades = cargar_unidades_csv()
-prestamos = cargar_prestamos_csv()
+#prestamos = cargar_prestamos_csv()
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
 menu_principal()
