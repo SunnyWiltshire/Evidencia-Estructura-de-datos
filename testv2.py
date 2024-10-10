@@ -35,7 +35,7 @@ def menu_principal():
                 ruta.pop()
             elif opcion == 2:
                 ruta.append("Prestamo")
-                registrar_prestamo()
+                registrar_prestamo(clientes, unidades, prestamos, rentas)
                 ruta.pop()
             elif opcion == 3:
                 ruta.append("Retorno")
@@ -241,14 +241,14 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
 ## FUNCIONES PARA EL REGISTRO DE UN PRÉSTAMO
 
 ## Apartado para registrar los préstamos
-def registrar_prestamo():
+def registrar_prestamo(clientes, unidades, prestamos, rentas):
     while True:
-            mostrar_ruta()
-            tab_prestamos(clientes, unidades)
-            opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
-            
-            if opcion == "S":
-                print("\n--- REGISTRO DE PRÉSTAMO ---")
+        mostrar_ruta()
+        tab_prestamos(clientes, unidades)
+        opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
+        
+        if opcion == "S":
+            print("\n--- REGISTRO DE PRÉSTAMO ---")
 
             fecha_actual = datetime.now().date()
             folio = max(prestamos, default=0) + 1
@@ -314,8 +314,17 @@ def registrar_prestamo():
                 'Retorno': False
             }
 
-            print(f"Préstamo registrado exitosamente. Folio: {folio}, Cliente: {Clave_cliente}, Unidad: {Clave_unidad}, Fecha de Préstamo: {fecha_prestamo}")
+            # Actualizar la cantidad de rentas
+            if Clave_cliente in rentas:
+                rentas[Clave_cliente] += 1
+            else:
+                rentas[Clave_cliente] = 1  # Inicializar si no existe
+
+            # Guardar los préstamos y rentas
             export_prestamos_auto(prestamos)
+            guardar_rentas_csv(rentas)
+
+            print(f"Préstamo registrado exitosamente. Folio: {folio}, Cliente: {clientes[Clave_cliente][1]} {clientes[Clave_cliente][0]}, Unidad: {Clave_unidad}, Fecha de Préstamo: {fecha_prestamo}")
             break
 
 ## Impresión tabular que muestra los clientes y unidades al momento de realizar un préstamo
@@ -358,19 +367,30 @@ def cargar_prestamos_csv(nombre_archivo="Prestamos_bicicletas.csv"):
     try:
         with open(nombre_archivo, "r", encoding="latin1", newline="") as archivocsv_prestamos:
             lector = csv.reader(archivocsv_prestamos)
+            # Saltar los encabezados
+            next(lector)
             for fila in lector:
+                # Verificar si la fila tiene el número correcto de columnas
+                if len(fila) != 7:  # Ajusta este número si tienes más o menos columnas en tu CSV
+                    continue
+                
                 folio, Clave_cliente, Clave_unidad, Fecha_prestamo, Fecha_de_retorno, Cantidad_dias, Retorno = fila
-                prestamos[int(folio)] = {
-                    'Clave_cliente': Clave_cliente,
-                    'Clave_unidad': Clave_unidad,
-                    'Fecha_prestamo': Fecha_prestamo,
-                    'Fecha_retorno': Fecha_de_retorno,
-                    'Cantidad_dias': Cantidad_dias,  
-                    'Retorno': Retorno
-                }
+                
+                # Asegurarse de que 'folio' es un número válido antes de convertir
+                if folio.isdigit():
+                    prestamos[int(folio)] = {
+                        'Clave_cliente': Clave_cliente,
+                        'Clave_unidad': Clave_unidad,
+                        'Fecha_prestamo': Fecha_prestamo,
+                        'Fecha_retorno': Fecha_de_retorno,
+                        'Cantidad_dias': int(Cantidad_dias),  # Asegúrate de que sea un número
+                        'Retorno': Retorno
+                    }
     except FileNotFoundError:
         print("El archivo de préstamos no existe. Se creará uno nuevo al exportar.")
+    
     return prestamos
+
 
 
 ## MENU DE RETORNO        
@@ -856,7 +876,7 @@ def submenu_analisis():
             if opcion == 1:
                 duracion_prestamos(prestamos)
             elif opcion == 2:
-                ranking_clientes()
+                ranking_clientes(prestamos, clientes, rentas)
             elif opcion == 3:
                 preferencias_rentas()
             elif opcion == 4:
@@ -897,15 +917,88 @@ def duracion_prestamos(prestamos):
     for clave, valor in reporte.items():
         print(f"{clave}: {valor}")
 
+
+#cargar rentas
+def cargar_rentas_csv():
+    try:
+        df = pd.read_csv('rentas.csv')
+        rentas = {}
+        for index, row in df.iterrows():
+            clave_cliente = row['Clave_cliente']
+            cantidad_rentas = row['Cantidad_rentas']
+            rentas[clave_cliente] = cantidad_rentas
+        return rentas
+    except FileNotFoundError:
+        print("El archivo 'rentas.csv' no se encontró. Se inicializarán rentas vacías.")
+        return {}
+    except Exception as e:
+        print(f"Ocurrió un error al cargar las rentas: {e}")
+        return {}
+    
+#guardar rentas
+def guardar_rentas_csv(rentas):
+    try:
+        df = pd.DataFrame(list(rentas.items()), columns=['Clave_cliente', 'Cantidad_rentas'])
+        df.to_csv('rentas.csv', index=False)
+    except Exception as e:
+        print(f"Ocurrió un error al guardar las rentas: {e}")
+    
+
+
+
+
 ## SUBMENÚ RANKING CLIENTES
-def ranking_clientes():
-    print('lolol')
+
+# Función para generar el ranking de clientes
+def ranking_clientes(prestamos, clientes, rentas):
+    # Crear una estructura para el ranking
+    ranking_data = {
+        'Clave_cliente': [],
+        'Nombre_completo': [],
+        'Cantidad_rentas': []
+    }
+
+    # Calcular las rentas para cada cliente
+    for folio, prestamo in prestamos.items():
+        clave_cliente = prestamo['Clave_cliente']
+        # Verifica si el cliente tiene rentas registradas
+        cantidad_rentas = rentas.get(clave_cliente, 0)
+
+        if clave_cliente not in ranking_data['Clave_cliente']:
+            # Obtener el nombre completo del cliente
+            cliente = clientes.get(clave_cliente, (None, None, None))
+            if cliente:
+                ranking_data['Clave_cliente'].append(clave_cliente)
+                ranking_data['Nombre_completo'].append(f"{cliente[1]} {cliente[0]}")  # Nombre y Apellido
+                ranking_data['Cantidad_rentas'].append(cantidad_rentas)
+
+    # Mostrar el ranking
+    print("\n--- RANKING DE CLIENTES ---")
+    print(f"{'Clave':<10} {'Nombre Completo':<40} {'Cantidad de Rentas':<20}")
+    print("-" * 70)
+    for i in range(len(ranking_data['Clave_cliente'])):
+        print(f"{ranking_data['Clave_cliente'][i]:<10} {ranking_data['Nombre_completo'][i]:<40} {ranking_data['Cantidad_rentas'][i]:<20}")
+
+    # Guardar el ranking en un archivo CSV (opcional)
+    guardar_ranking_csv(ranking_data)
+
+def guardar_ranking_csv(ranking_data):
+    with open('ranking_clientes.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Clave_cliente', 'Nombre_completo', 'Cantidad_rentas'])  # Encabezados
+        for i in range(len(ranking_data['Clave_cliente'])):
+            writer.writerow([
+                ranking_data['Clave_cliente'][i],
+                ranking_data['Nombre_completo'][i],
+                ranking_data['Cantidad_rentas'][i]
+            ])
 
 ## SUBMENÚ PREFERENCIAS RENTAS
 def preferencias_rentas():
     print('lolol')
 
 # Inicio del programa
+rentas = cargar_rentas_csv()
 clientes = cargar_clientes_csv()
 unidades = cargar_unidades_csv()
 prestamos = cargar_prestamos_csv()

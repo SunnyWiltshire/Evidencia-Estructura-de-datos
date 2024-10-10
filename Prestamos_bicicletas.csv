@@ -1,3 +1,0 @@
-Folio,Clave Cliente,Clave Unidad,Fecha préstamo,Fecha retorno,Cantidad_días,Retorno
-1,1,1,10/08/2024,10/16/2024,8,False
-2,2,2,10/08/2024,10/18/2024,10,False
