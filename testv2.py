@@ -35,7 +35,7 @@ def menu_principal():
                 ruta.pop()
             elif opcion == 2:
                 ruta.append("Prestamo")
-                registrar_prestamo(clientes, unidades, prestamos, rentas)
+                registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas)
                 ruta.pop()
             elif opcion == 3:
                 ruta.append("Retorno")
@@ -239,7 +239,7 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
 ## FUNCIONES PARA EL REGISTRO DE UN PRÉSTAMO
 
 ## Apartado para registrar los préstamos
-def registrar_prestamo(clientes, unidades, prestamos, rentas):
+def registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas, conteo_colores):
     mostrar_ruta()
     while True:
         tab_prestamos(clientes, unidades)
@@ -297,7 +297,7 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas):
                 if Cantidad_de_dias.isdigit() and int(Cantidad_de_dias) > 0:
                     Cantidad_de_dias = int(Cantidad_de_dias)
                     fecha_de_retorno = fecha_prestamo + timedelta(days=Cantidad_de_dias)
-                    print(f"La fecha en la que se debe de regresar la unidad es el: {fecha_de_retorno.strftime('%m/%d/%Y')}")
+                    print(f"La fecha en la que se debe regresar la unidad es el: {fecha_de_retorno.strftime('%m/%d/%Y')}")
                     break
                 print("La cantidad de días debe ser un número mayor a 0.")
                 if cancelar(): return
@@ -318,9 +318,25 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas):
             else:
                 rentas[Clave_cliente] = 1  # Inicializar si no existe
 
+            # Actualizar conteo de rodadas
+            rodada = int(unidades[Clave_unidad][0])  # Obtener la rodada de la unidad
+            if rodada in conteo_rodadas:
+                conteo_rodadas[rodada] += 1
+            else:
+                conteo_rodadas[rodada] = 1  # Inicializar si no existe
+
+            # Actualizar conteo de colores
+            color = unidades[Clave_unidad][1]  # Obtener el color de la unidad
+            if color in conteo_colores:
+                conteo_colores[color] += 1
+            else:
+                conteo_colores[color] = 1  # Inicializar si no existe
+
             # Guardar los préstamos y rentas
             export_prestamos_auto(prestamos)
             guardar_rentas_csv(rentas)
+            export_conteo_rodada(conteo_rodadas)
+            export_conteo_colores(conteo_colores)
 
             print(f"Préstamo registrado exitosamente. Folio: {folio}, Cliente: {clientes[Clave_cliente][1]} {clientes[Clave_cliente][0]}, Unidad: {Clave_unidad}, Fecha de Préstamo: {fecha_prestamo}")
             break
@@ -328,6 +344,8 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas):
             break
         else: 
             print("Favor de indicar un valor correcto (S/N)")
+            if cancelar(): return
+
             
             
 ## Impresión tabular que muestra los clientes y unidades al momento de realizar un préstamo
@@ -1087,30 +1105,19 @@ def preferencias_rentas():
         if opcion_pref.isdigit():
             opcion_pref = int(opcion_pref)
             if opcion_pref == 1:
-                reporte_prestamos_por_rodada(prestamos, unidades)
+                reporte_prestamos_por_rodada(conteo_rodadas)
                 break
             elif opcion_pref == 2:
-                #reporte_prestamos_por_color(prestamos, unidades)
-                pass
+                reporte_prestamos_por_color(prestamos, unidades)
+                break
             else:
                 print("Opción inválida. Debes ingresar 1 o 2.")
         else:
             print("Entrada inválida. Por favor ingresa un número (1 o 2).")
 
-def reporte_prestamos_por_rodada(prestamos, unidades):
-    # Crear un diccionario para contar los préstamos por rodada
-    conteo_rodada = {20: 0, 26: 0, 29: 0}
-
-    # Recorrer los préstamos para contar las rodadas
-    for prestamo in prestamos.values():
-        clave_unidad = prestamo['Clave_unidad']
-        if clave_unidad in unidades:
-            rodada = int(unidades[clave_unidad][0])  # La rodada está en el primer elemento de la tupla
-            if rodada in conteo_rodada:
-                conteo_rodada[rodada] += 1
-
-    # Convertir los datos en una lista de tuplas y ordenarlos por cantidad de préstamos
-    datos_ordenados = sorted(conteo_rodada.items(), key=lambda x: x[1], reverse=True)
+def reporte_prestamos_por_rodada(conteo_rodadas):
+    # Ordenar las rodadas por la cantidad de préstamos en orden descendente
+    datos_ordenados = sorted(conteo_rodadas.items(), key=lambda x: x[1], reverse=True)
 
     # Imprimir el reporte en formato tabular
     print("\n--- REPORTE DE PRÉSTAMOS POR RODADA ---")
@@ -1119,8 +1126,85 @@ def reporte_prestamos_por_rodada(prestamos, unidades):
     for rodada, cantidad in datos_ordenados:
         print("{:<10} {:<20}".format(rodada, cantidad))
 
+
+
+
+def export_conteo_rodada(conteo_rodadas, nombre_archivo="Conteo_Rodadas.csv"):
+    # Exportar el conteo de rodadas a un archivo CSV
+    with open(nombre_archivo, "w", encoding="latin1", newline="") as archivo_csv:
+        grabador = csv.writer(archivo_csv)
+        grabador.writerow(("Rodada", "Cantidad de Préstamos"))
+        for rodada, cantidad in conteo_rodadas.items():
+            grabador.writerow((rodada, cantidad))
+    print(f"Conteo de rodadas exportado exitosamente en '{nombre_archivo}'")
+
+
+def cargar_conteo_rodadas(nombre_archivo="Conteo_Rodadas.csv"):
+    conteo_rodadas = {}
+    try:
+        # Abrir el archivo CSV para leer el conteo de rodadas
+        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivo_csv:
+            lector = csv.reader(archivo_csv)
+            # Saltar la fila de encabezado
+            next(lector)
+            # Leer cada fila y actualizar el diccionario conteo_rodadas
+            for fila in lector:
+                if len(fila) == 2:  # Asegurar que la fila tiene exactamente 2 columnas
+                    rodada, cantidad = fila
+                    conteo_rodadas[int(rodada)] = int(cantidad)
+    except FileNotFoundError:
+        print(f"El archivo '{nombre_archivo}' no existe. Asegúrate de que el archivo se haya exportado previamente.")
+    
+    return conteo_rodadas
+    
+    
+   def reporte_prestamos_por_color(prestamos, unidades):
+    # Crear un diccionario para contar los préstamos por color
+    conteo_color = {}
+
+    # Recorrer los préstamos para contar los colores
+    for prestamo in prestamos.values():
+        clave_unidad = prestamo['Clave_unidad']
+        if clave_unidad in unidades:
+            color = unidades[clave_unidad][1]  # Suponiendo que el color está en el segundo elemento de la tupla
+            if color in conteo_color:
+                conteo_color[color] += 1
+            else:
+                conteo_color[color] = 1
+
+    # Convertir los datos en una lista de tuplas y ordenarlos por cantidad de préstamos (descendente)
+    datos_ordenados = sorted(conteo_color.items(), key=lambda x: x[1], reverse=True)
+
+    # Imprimir el reporte en formato tabular
+    print("\n--- REPORTE DE PRÉSTAMOS POR COLOR ---")
+    print("{:<15} {:<20}".format("Color", "Cantidad de Préstamos"))
+    print("-" * 35)
+    for color, cantidad in datos_ordenados:
+        print("{:<15} {:<20}".format(color, cantidad))
+
+def cargar_conteo_colores(nombre_archivo="Conteo_Colores.csv"):
+    conteo_colores = {}
+    try:
+        # Abrir el archivo CSV para leer el conteo de colores
+        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivo_csv:
+            lector = csv.reader(archivo_csv)
+            # Saltar la fila de encabezado
+            next(lector)
+            # Leer cada fila y actualizar el diccionario conteo_colores
+            for fila in lector:
+                if len(fila) == 2:  # Asegurarse de que la fila tiene exactamente 2 columnas
+                    color, cantidad = fila
+                    conteo_colores[color] = int(cantidad)
+    except FileNotFoundError:
+        print(f"El archivo '{nombre_archivo}' no existe. Asegúrate de que el archivo se haya exportado previamente.")
+    
+    return conteo_colores 
+    
+    
     
 # Inicio del programa
+conteo_colores = cargar_conteo_colores()
+conteo_rodadas = cargar_conteo_rodadas()
 rentas = cargar_rentas_csv()
 clientes = cargar_clientes_csv()
 unidades = cargar_unidades_csv()
