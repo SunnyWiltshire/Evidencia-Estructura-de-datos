@@ -116,28 +116,30 @@ def registro_Unidad():
             clave = max(unidades, default=0) + 1
             while True:
                 entrada = input('Ingrese la rodada de la unidad (20, 26 o 29): ')
-                rodada = int(entrada)
-                if rodada in [20, 26, 29]:
-                    break
-                else:
-                    print("Rodada no válida.")
-                if cancelar():
-                    return
-            while True:
-                print("""\nTenemos disponibles los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")
-                color = input("Elige un color para la bicicleta: ").upper()
-                if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
-                    print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
-                    unidades[clave] = (entrada, color)
-                    export_unidades_auto(unidades)
-                    break
-                else: 
-                    print("Color no válido")
-                if cancelar():
-                    return
+                try:
+                    rodada = int(entrada)
+                    if rodada in [20, 26, 29]:
+                        print("""\nTenemos disponibles los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")
+                        color = input("Elige un color para la bicicleta: ").upper()
+                        if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
+                            print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
+                            unidades[clave] = (entrada, color)
+                            export_unidades_auto(unidades)
+                        else: 
+                            if cancelar():
+                                return
+                        return False
+                    else:
+                        print("Por favor, ingrese un valor valido (20, 26 o 29).")
+                        if cancelar():
+                            break
+                    
+                except ValueError:
+                    print('Favor de ingresar un valor valido\n')
+                    if cancelar():
+                        break
         elif opcion == "N":
-            # Regresar al menú registro si elige 'N'
-            break
+            return False
         else:
             print("Opción inválida. Debes ingresar 'S' o 'N'.")
             if cancelar():
