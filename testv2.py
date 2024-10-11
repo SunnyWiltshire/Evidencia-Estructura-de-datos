@@ -20,7 +20,7 @@ def menu_principal():
         mostrar_ruta()
         print("\n--- MENÚ PRINCIPAL ---")
         print("1. Registro")
-        print("2. Prestamo")
+        print("2. Préstamo")
         print("3. Retorno")
         print("4. Informes")
         print("5. Salir\n")
@@ -116,30 +116,28 @@ def registro_Unidad():
             clave = max(unidades, default=0) + 1
             while True:
                 entrada = input('Ingrese la rodada de la unidad (20, 26 o 29): ')
-                try:
-                    rodada = int(entrada)
-                    if rodada in [20, 26, 29]:
-                        print("""\nTenemos disponibles los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")
-                        color = input("Elige un color para la bicicleta: ").upper()
-                        if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
-                            print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
-                            unidades[clave] = (entrada, color)
-                            export_unidades_auto(unidades)
-                        else: 
-                            if cancelar():
-                                return
-                        return False
-                    else:
-                        print("Por favor, ingrese un valor valido (20, 26 o 29).")
-                        if cancelar():
-                            break
-                    
-                except ValueError:
-                    if cancelar():
-                        break
+                rodada = int(entrada)
+                if rodada in [20, 26, 29]:
+                    break
+                else:
+                    print("Rodada no válida.")
+                if cancelar():
+                    return
+            while True:
+                print("""\nTenemos disponibles los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")
+                color = input("Elige un color para la bicicleta: ").upper()
+                if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
+                    print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
+                    unidades[clave] = (entrada, color)
+                    export_unidades_auto(unidades)
+                    break
+                else: 
+                    print("Color no válido")
+                if cancelar():
+                    return
         elif opcion == "N":
             # Regresar al menú registro si elige 'N'
-            return False
+            break
         else:
             print("Opción inválida. Debes ingresar 'S' o 'N'.")
             if cancelar():
@@ -242,8 +240,8 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
 
 ## Apartado para registrar los préstamos
 def registrar_prestamo(clientes, unidades, prestamos, rentas):
+    mostrar_ruta()
     while True:
-        mostrar_ruta()
         tab_prestamos(clientes, unidades)
         opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
         
@@ -326,7 +324,12 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas):
 
             print(f"Préstamo registrado exitosamente. Folio: {folio}, Cliente: {clientes[Clave_cliente][1]} {clientes[Clave_cliente][0]}, Unidad: {Clave_unidad}, Fecha de Préstamo: {fecha_prestamo}")
             break
-
+        if opcion == 'N':
+            break
+        else: 
+            print("Favor de indicar un valor correcto (S/N)")
+            
+            
 ## Impresión tabular que muestra los clientes y unidades al momento de realizar un préstamo
 def tab_prestamos(clientes, unidades):
     print(f"{'Clave del cliente':^15}{'Nombre del cliente':^41}{'Clave de la unidad':^20}{'Rodada':^10}")
@@ -429,6 +432,7 @@ def menu_retorno():
 
 ## MENU INFORMES
 def menu_informes():
+    mostrar_ruta()
     while True:
         print("\n--- MENÚ INFORMES ---")
         print("1. Reportes")
@@ -440,9 +444,13 @@ def menu_informes():
             opcion = int(opcion)
 
             if opcion == 1:
+                ruta.append("Reportes")
                 submenu_reportes()
+                ruta.pop()
             elif opcion == 2:
+                ruta.append("Análisis")
                 submenu_analisis()
+                ruta.pop()
             elif opcion == 3:
                 return False
             else:
@@ -464,23 +472,31 @@ def submenu_reportes():
     print("6. Salir al menú principal\n")
 
     try:
-      reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
-      if reporte_opcion == 1:
-        ruta.append('Exportar Clientes')
-        exportar_clientes()
-        ruta.pop()
-      elif reporte_opcion == 2:
-        ruta.append('Prestamos por retornar')
-        reporte_prestamos_por_retornar(prestamos)
-        ruta.pop()
-      elif reporte_opcion == 3:
-        ruta.append('Prestamos por periodo')
-        prestamos_por_periodo()
-        ruta.pop()
-      elif reporte_opcion == 4:
-        return False
-      else:
-        print("Ingresa una opción válida")
+        reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
+        if reporte_opcion == 1:
+            ruta.append('Clientes')
+            exportar_clientes()
+            ruta.pop()
+        elif reporte_opcion == 2:
+            ruta.append('Unidades')
+            exportar_unidades()
+            ruta.pop()
+        elif reporte_opcion == 3:
+            ruta.append('Retrasos')
+            retrasos()
+            ruta.pop()
+        elif reporte_opcion == 4:
+            ruta.append('Prestamos por retornar')
+            reporte_prestamos_por_retornar(prestamos)
+            ruta.pop()
+        elif reporte_opcion == 5:
+            ruta.append('Prestamos por periodo')
+            prestamos_por_periodo(prestamos)
+            ruta.pop()
+        elif reporte_opcion == 6:
+            return False    
+        else:
+            print("Ingresa una opción válida")
     except Exception as error_name:
         print(f"Ha ocurrido un error: {error_name}")
         if cancelar():
@@ -518,6 +534,77 @@ def exportar_clientes():
             else:
                 print("No hay clientes para exportar")
                 break
+def exportar_unidades():
+    mostrar_ruta()
+    while True:
+        if unidades:
+            tab_unidades(unidades)
+            try:
+                export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4. Salir al submenú\n"))
+                if export_opcion == 1:
+                    export_csv_unidades()
+                elif export_opcion == 2:
+                    export_excel_unidades()
+                elif export_opcion == 3:
+                    export_csv_unidades()
+                    export_excel_unidades()
+                elif export_opcion == 4:
+                    break
+                else:
+                    print("Elige una opcion valida")
+                    if cancelar():
+                        break
+            except ValueError:
+                    print("Error: Debes ingresar un número entero que sea válido.")
+                    if cancelar():
+                        break
+            except Exception as name_error:
+                    print(f"Ha ocurrido un error inesperado: {name_error}")
+                    if cancelar():
+                        break
+            else:
+                print("No hay clientes para exportar")
+                break
+
+def export_excel_unidades(unidades, name_excel="Unidades.xlsx"):
+    libro = openpyxl.Workbook()
+    hoja = libro.active
+    hoja.title = "Unidades"
+
+    hoja["A1"].value = "Clave"
+    hoja["B1"].value = "Rodada"
+    hoja["C1"].value = "Color"
+
+    
+    hoja["A1"].font = Font(bold=True)
+    hoja["B1"].font = Font(bold=True)
+    hoja["C1"].font = Font(bold=True)
+
+    i = 2
+
+    for clave, (rodada, color) in clientes.items():
+        hoja.cell(row=i, column=1).value = clave
+        hoja.cell(row=i, column=2).value = rodada
+        hoja.cell(row=i, column=3).value = color
+        i += 1
+        
+    ajustar_ancho_columnas(hoja)
+    libro.save(name_excel)
+    print(f"Datos exportados con éxito en {name_excel}")
+
+def tab_unidades(unidades):
+    print(f"{'Clave':^8}{'Rodada': <10}{'Color'}")
+    print("=" * 30)
+    for clave, datos in unidades.items():
+        print(f"{clave:^8}{datos[0]: <10}{datos[1]}")
+    print("=" * 30)
+
+def export_csv_unidades(unidades):
+    with open("Unidades_bicicletas.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
+        grabador = csv.writer(archivocsv_unidades)
+        grabador.writerow(("Clave", "Rodada", "Color"))
+        grabador.writerows([(clave, datos[0], datos[1]) for clave, datos in unidades.items()])
+        print("Datos exportados con éxito en Unidades_bicicletas.csv")
 
 ## Impresión tabular que muestra los clientes
 def tab_clientes(clientes):
@@ -608,6 +695,7 @@ def listado_unidades():
 ## SUBMENU RETRASOS
 def retrasos():
     print('print pa q no de error, favor d borrar')
+
 ## SUBMENU ANÁLISIS COMPLETO
 def analisis_completo():
     print('lolol')
@@ -862,6 +950,7 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
 
 ##Submenú analísis
 def submenu_analisis():
+    mostrar_ruta()
     while True:
         print("\n--- SUBMENÚ ANÁLISIS ---")
         print("1. Duración de los préstamos.")
@@ -944,10 +1033,6 @@ def guardar_rentas_csv(rentas):
     except Exception as e:
         print(f"Ocurrió un error al guardar las rentas: {e}")
     
-
-
-
-
 ## SUBMENÚ RANKING CLIENTES
 
 # Función para generar el ranking de clientes
