@@ -130,6 +130,8 @@ def registro_Unidad():
                             print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
                             unidades[clave] = {entrada, color}
                             export_unidades_auto(unidades)
+                            listado_unidades_completo(unidades)
+                            
                         else: 
                             if cancelar():
                                 return
@@ -151,13 +153,13 @@ def registro_Unidad():
                 break
             return
 #funcion de listado de unidades completo
-def analisis_completo(unidades): 
+def listado_unidades_completo(unidades): 
     print("\n Listado completo")
     df_listado_completo = pd.DataFrame.from_dict(unidades, orient ="index")
     print(df_listado_completo)
 
 #funcion de listado por rodada 
-def analisis_rodada(unidades): 
+def listado_rodada(unidades): 
     print("\n Listado por rodada")
     while True: 
         try: 
@@ -173,7 +175,7 @@ def analisis_rodada(unidades):
             print("El dato ingresado no es válido, por favor ingrese un número")
 
 #funcion de listado por color
-def analisis_color(unidades):
+def listado_color(unidades):
     print("\n Listado por color")
     print("""\nIngresa uno de los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")    
     while True:
