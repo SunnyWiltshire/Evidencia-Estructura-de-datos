@@ -122,25 +122,25 @@ def registro_Unidad():
             while True:
                 entrada = input('Ingrese la rodada de la unidad (20, 26 o 29): ')
                 try:
-                    rodada = int(entrada)
-                    if rodada in [20, 26, 29]:
-                        print("""\nTenemos disponibles los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")
-                        color = input("Elige un color para la bicicleta: ").upper()
-                        if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
-                            print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
-                            unidades[clave] = {entrada, color}
-                            export_unidades_auto(unidades)
-                            listado_unidades_completo(unidades)
-                            
-                        else: 
+                    while True:
+                        rodada = int(entrada)
+                        if rodada in [20, 26, 29]:
+                            while True:
+                                print("""\nTenemos disponibles los siguientes colores: \nRojo \nAzul \nAmarillo \nVerde \nRosa""")
+                                color = input("Elige un color para la bicicleta: ").upper()
+                                if color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
+                                    unidades[clave] = (entrada, color)
+                                    export_unidades_auto(unidades)
+                                    listado_unidades_completo(unidades)   
+                                    print(f"Unidad registrada con exito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
+                                    return False
+                                else:
+                                    if cancelar():
+                                        break
+                        else:
+                            print("Por favor, ingrese un valor valido (20, 26 o 29).")
                             if cancelar():
-                                return
-                        return False
-                    else:
-                        print("Por favor, ingrese un valor valido (20, 26 o 29).")
-                        if cancelar():
-                            break
-                    
+                                break
                 except ValueError:
                     if cancelar():
                         break
@@ -653,6 +653,18 @@ def listado_unidades():
 ## SUBMENU RETRASOS
 def retrasos():
     print('print pa q no de error, favor d borrar')
+
+## SUBMENU ANÁLISIS COMPLETO
+def analisis_completo():
+    print('lolol')
+
+## SUBMENU ANÁLISIS POR RODADA
+def analisis_rodada():
+    print('lolol')
+
+## SUBMENU ANÁLISIS POR COLOR
+def analisis_color():
+    print('lolol')
 
 ## SUBMENU REPORTES PRÉSTAMOS POR RETORNAR
 def reporte_prestamos_por_retornar(prestamos):
