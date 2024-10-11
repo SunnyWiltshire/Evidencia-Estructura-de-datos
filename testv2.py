@@ -989,10 +989,52 @@ def guardar_ranking_csv(df_ranking):
     df_ranking.to_csv("Ranking_clientes.csv", index=False, encoding="latin1")
     print("Ranking de clientes exportado exitosamente en 'Ranking_clientes.csv'.")
 
+
+
 ## SUBMENÚ PREFERENCIAS RENTAS
 def preferencias_rentas():
-    print('lolol')
+    print("Elige el reporte que deseas generar:")
+    print("1. Cantidad de préstamos por rodada")
+    print("2. Cantidad de préstamos por color")
+    
+    while True:
+        opcion_pref = input("Ingresa una opción (1 o 2): ")
+        if opcion_pref.isdigit():
+            opcion_pref = int(opcion_pref)
+            if opcion_pref == 1:
+                reporte_prestamos_por_rodada(prestamos, unidades)
+                break
+            elif opcion_pref == 2:
+                #reporte_prestamos_por_color(prestamos, unidades)
+                pass
+            else:
+                print("Opción inválida. Debes ingresar 1 o 2.")
+        else:
+            print("Entrada inválida. Por favor ingresa un número (1 o 2).")
 
+def reporte_prestamos_por_rodada(prestamos, unidades):
+    # Crear un diccionario para contar los préstamos por rodada
+    conteo_rodada = {20: 0, 26: 0, 29: 0}
+
+    # Recorrer los préstamos para contar las rodadas
+    for prestamo in prestamos.values():
+        clave_unidad = prestamo['Clave_unidad']
+        if clave_unidad in unidades:
+            rodada = int(unidades[clave_unidad][0])  # La rodada está en el primer elemento de la tupla
+            if rodada in conteo_rodada:
+                conteo_rodada[rodada] += 1
+
+    # Convertir los datos en una lista de tuplas y ordenarlos por cantidad de préstamos
+    datos_ordenados = sorted(conteo_rodada.items(), key=lambda x: x[1], reverse=True)
+
+    # Imprimir el reporte en formato tabular
+    print("\n--- REPORTE DE PRÉSTAMOS POR RODADA ---")
+    print("{:<10} {:<20}".format("Rodada", "Cantidad de Préstamos"))
+    print("-" * 30)
+    for rodada, cantidad in datos_ordenados:
+        print("{:<10} {:<20}".format(rodada, cantidad))
+
+    
 # Inicio del programa
 rentas = cargar_rentas_csv()
 clientes = cargar_clientes_csv()
