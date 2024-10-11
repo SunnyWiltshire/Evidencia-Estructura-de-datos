@@ -338,7 +338,7 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas, co
             export_prestamos_auto(prestamos)
             guardar_rentas_csv(rentas)
             export_conteo_rodada(conteo_rodadas)
-            export_conteo_colores(conteo_colores)
+            exportar_colores_csv(unidades)
 
             print(f"Préstamo registrado exitosamente. Folio: {folio}, Cliente: {clientes[Clave_cliente][1]} {clientes[Clave_cliente][0]}, Unidad: {Clave_unidad}, Fecha de Préstamo: {fecha_prestamo}")
             break
@@ -1110,7 +1110,7 @@ def preferencias_rentas():
                 reporte_prestamos_por_rodada(conteo_rodadas)
                 break
             elif opcion_pref == 2:
-                reporte_prestamos_por_color(prestamos, unidades)
+                reporte_colores_tabular_ordenado(unidades)
                 break
             else:
                 print("Opción inválida. Debes ingresar 1 o 2.")
@@ -1160,52 +1160,59 @@ def cargar_conteo_rodadas(nombre_archivo="Conteo_Rodadas.csv"):
     return conteo_rodadas
     
     
-   def reporte_prestamos_por_color(prestamos, unidades):
-    # Crear un diccionario para contar los préstamos por color
-    conteo_color = {}
-
-    # Recorrer los préstamos para contar los colores
-    for prestamo in prestamos.values():
-        clave_unidad = prestamo['Clave_unidad']
-        if clave_unidad in unidades:
-            color = unidades[clave_unidad][1]  # Suponiendo que el color está en el segundo elemento de la tupla
-            if color in conteo_color:
-                conteo_color[color] += 1
-            else:
-                conteo_color[color] = 1
-
-    # Convertir los datos en una lista de tuplas y ordenarlos por cantidad de préstamos (descendente)
-    datos_ordenados = sorted(conteo_color.items(), key=lambda x: x[1], reverse=True)
-
-    # Imprimir el reporte en formato tabular
-    print("\n--- REPORTE DE PRÉSTAMOS POR COLOR ---")
-    print("{:<15} {:<20}".format("Color", "Cantidad de Préstamos"))
-    print("-" * 35)
-    for color, cantidad in datos_ordenados:
-        print("{:<15} {:<20}".format(color, cantidad))
-
-def cargar_conteo_colores(nombre_archivo="Conteo_Colores.csv"):
-    conteo_colores = {}
+# 1. Función para exportar los colores a un archivo CSV
+def exportar_colores_csv(unidades, nombre_archivo="Colores.csv"):
     try:
-        # Abrir el archivo CSV para leer el conteo de colores
-        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivo_csv:
+        with open(nombre_archivo, mode='w', newline='', encoding='latin1') as archivo_csv:
+            escritor = csv.writer(archivo_csv)
+            escritor.writerow(["Rodada", "Color"])  # Encabezados
+            for clave, (rodada, color) in unidades.items():
+                escritor.writerow([rodada, color])
+        print(f"Colores exportados exitosamente a {nombre_archivo}.")
+    except Exception as e:
+        print(f"Error al exportar colores: {e}")
+
+# 2. Función para cargar los colores desde un archivo CSV
+def cargar_colores_csv(nombre_archivo="Colores.csv"):
+    unidades = {}
+    try:
+        with open(nombre_archivo, mode='r', newline='', encoding='latin1') as archivo_csv:
             lector = csv.reader(archivo_csv)
-            # Saltar la fila de encabezado
-            next(lector)
-            # Leer cada fila y actualizar el diccionario conteo_colores
+            next(lector)  # Saltar encabezado
             for fila in lector:
-                if len(fila) == 2:  # Asegurarse de que la fila tiene exactamente 2 columnas
-                    color, cantidad = fila
-                    conteo_colores[color] = int(cantidad)
+                if len(fila) == 2:
+                    rodada, color = fila
+                    unidades[rodada] = color
+        print(f"Colores cargados exitosamente desde {nombre_archivo}.")
     except FileNotFoundError:
-        print(f"El archivo '{nombre_archivo}' no existe. Asegúrate de que el archivo se haya exportado previamente.")
-    
-    return conteo_colores 
-    
+        print(f"El archivo '{nombre_archivo}' no existe.")
+    except Exception as e:
+        print(f"Error al cargar colores: {e}")
+    return unidades
+
+# 3. Función para generar un reporte tabular de los colores
+def reporte_colores_tabular_ordenado(unidades):
+    conteo_colores = {}
+    for clave, (rodada, color) in unidades.items():
+        if color in conteo_colores:
+            conteo_colores[color] += 1
+        else:
+            conteo_colores[color] = 1
+
+    # Ordenar los colores alfabéticamente
+    colores_ordenados = sorted(conteo_colores.items())
+
+    # Imprimir reporte en formato tabular
+    print("\n--- REPORTE DE COLORES (ORDENADO) ---")
+    print(f"{'Color':<15} {'Cantidad':<10}")
+    print("-" * 25)
+    for color, cantidad in colores_ordenados:
+        print(f"{color:<15} {cantidad:<10}")
+  
     
     
 # Inicio del programa
-conteo_colores = cargar_conteo_colores()
+conteo_colores = cargar_colores_csv()
 conteo_rodadas = cargar_conteo_rodadas()
 rentas = cargar_rentas_csv()
 clientes = cargar_clientes_csv()
