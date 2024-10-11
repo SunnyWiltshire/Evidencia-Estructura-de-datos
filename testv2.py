@@ -898,7 +898,7 @@ def duracion_prestamos(prestamos):
 
     media = df['Días de préstamo'].mean()
     mediana = df['Días de préstamo'].median()
-    #moda = stats.mode(df['Días de préstamo'])[0][0] #checare otra opcion ya que esta marcaba error, gracias.
+    moda = df['Días de préstamo'].mode().tolist()  # Convertir a lista en caso de múltiples modas
     minimo = df['Días de préstamo'].min()
     maximo = df['Días de préstamo'].max()
     desviacion_estandar = df['Días de préstamo'].std()
@@ -907,7 +907,7 @@ def duracion_prestamos(prestamos):
     reporte = {
         "Media": media,
         "Mediana": mediana,
-        #"Moda": moda, #por el momento no funciona, gracias.
+        "Moda": moda,
         "Mínimo": minimo,
         "Máximo": maximo,
         "Desviación estándar": desviacion_estandar,
