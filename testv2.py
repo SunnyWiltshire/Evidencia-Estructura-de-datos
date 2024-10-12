@@ -15,7 +15,7 @@ def mostrar_ruta():
     print(" > ".join(ruta))
 #funcion que despliega el menu principal
 def menu_principal():
-    ruta.append('Menu Principal')
+    ruta.append('Menú Principal')
     while True:
         mostrar_ruta()
         print("\n--- MENÚ PRINCIPAL ---")
@@ -348,8 +348,6 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas, co
             print("Favor de indicar un valor correcto (S/N)")
             if cancelar(): return
 
-            
-            
 ## Impresión tabular que muestra los clientes y unidades al momento de realizar un préstamo
 def tab_prestamos(clientes, unidades):
     print(f"{'Clave del cliente':^15}{'Nombre del cliente':^41}{'Clave de la unidad':^20}{'Rodada':^10}")
