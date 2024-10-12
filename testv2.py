@@ -560,12 +560,12 @@ def exportar_unidades():
             try:
                 export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4. Salir al submenú\n"))
                 if export_opcion == 1:
-                    export_csv_unidades()
+                    export_csv_unidades(unidades)
                 elif export_opcion == 2:
-                    export_excel_unidades()
+                    export_excel_unidades(unidades)
                 elif export_opcion == 3:
-                    export_csv_unidades()
-                    export_excel_unidades()
+                    export_csv_unidades(unidades)
+                    export_excel_unidades(unidades)
                 elif export_opcion == 4:
                     break
                 else:
@@ -600,7 +600,7 @@ def export_excel_unidades(unidades, name_excel="Unidades.xlsx"):
 
     i = 2
 
-    for clave, (rodada, color) in clientes.items():
+    for clave, (rodada, color) in unidades.items():
         hoja.cell(row=i, column=1).value = clave
         hoja.cell(row=i, column=2).value = rodada
         hoja.cell(row=i, column=3).value = color
