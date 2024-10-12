@@ -233,7 +233,7 @@ def cargar_clientes_csv(nombre_archivo="Clientes_bicicletas.csv"):
             next(lector)
             for fila in lector:
                 clave, apellidos, nombres, telefono = fila
-                clientes[int(clave)] = (apellidos, nombres, telefono)
+                clientes[int(clave)] = (apellidos, nombres, int(telefono))
     except FileNotFoundError:
         print("El archivo de clientes no existe. Se creará uno nuevo al exportar.")
     return clientes
@@ -549,9 +549,9 @@ def exportar_clientes():
                     print(f"Ha ocurrido un error inesperado: {name_error}")
                     if cancelar():
                         break
-            else:
-                print("No hay clientes para exportar")
-                break
+        else:
+            print("No hay clientes para exportar")
+            break
 def exportar_unidades():
     mostrar_ruta()
     while True:
@@ -580,9 +580,9 @@ def exportar_unidades():
                     print(f"Ha ocurrido un error inesperado: {name_error}")
                     if cancelar():
                         break
-            else:
-                print("No hay clientes para exportar")
-                break
+        else:
+            print("No hay clientes para exportar")
+            break
 
 def export_excel_unidades(unidades, name_excel="Unidades.xlsx"):
     libro = openpyxl.Workbook()
