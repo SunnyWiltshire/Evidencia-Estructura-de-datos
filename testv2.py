@@ -35,7 +35,7 @@ def menu_principal():
                 ruta.pop()
             elif opcion == 2:
                 ruta.append("Prestamo")
-                registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas)
+                registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas, conteo_colores)
                 ruta.pop()
             elif opcion == 3:
                 ruta.append("Retorno")
@@ -245,6 +245,7 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas, co
     mostrar_ruta()
     while True:
         tab_prestamos(clientes, unidades)
+        tab_unidades(unidades)
         opcion = input("¿Deseas realizar un registro de préstamos? (S/N): ").upper()
         
         if opcion == "S":
@@ -487,8 +488,8 @@ def submenu_reportes():
     print("1. Clientes.")
     print("2. Listado de unidades.")
     print("3. Retrasos.")
-    print("4. préstamos por retornar.")
-    print("5. préstamos por periodo.")
+    print("4. Préstamos por retornar.")
+    print("5. Préstamos por periodo.")
     print("6. Salir al menú principal\n")
 
     try:
