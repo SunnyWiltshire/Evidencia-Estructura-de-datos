@@ -35,7 +35,7 @@ def menu_principal():
                 ruta.pop()
             elif opcion == 2:
                 ruta.append("Prestamo")
-                registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas)
+                registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas, conteo_colores)
                 ruta.pop()
             elif opcion == 3:
                 ruta.append("Retorno")
@@ -769,7 +769,7 @@ def reporte_prestamos_por_retornar(prestamos):
 
         print("=" * 80)
 
-        export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n 4.No deseo exportarlo"))
+        export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4.No deseo exportarlo\n"))
         if export_opcion == 1:
             export_csv_prestamos_retornar(prestamos, fecha_inicial, fecha_final)
         elif export_opcion == 2:
