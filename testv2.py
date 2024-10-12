@@ -509,7 +509,7 @@ def submenu_reportes():
             ruta.pop()
         elif reporte_opcion == 5:
             ruta.append('Prestamos por periodo')
-            prestamos_por_periodo(prestamos)
+            prestamos_por_periodo()
             ruta.pop()
         elif reporte_opcion == 6:
             return False    
@@ -763,7 +763,6 @@ def reporte_prestamos_por_retornar(prestamos):
             if datos['Retorno'] == 'False':
                 fecha_prestamo = datetime.strptime(datos["Fecha_prestamo"], "%m/%d/%Y").date()
                 fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date()
-
                 if fecha_inicial <= fecha_retorno <= fecha_final:
                     print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
 
