@@ -485,6 +485,68 @@ def menu_informes():
         except ValueError:
             print('Favor de ingresar un valor numerico')
 
+def import_clientes():
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conexion:
+            cursor = conexion.cursor()
+            # Consulta para obtener los datos de los clientes
+            cursor.execute("SELECT * FROM CLIENTES")
+            clientes = cursor.fetchall()
+        clientes_dict={}
+        if clientes:
+            for cliente in clientes:
+                clientes_dict[cliente[0]] = cliente[1],cliente[2],cliente[3]
+            return clientes_dict
+        else:
+            print('No hay clientes registrados')
+    except sqlite3.Error as e:
+        print(e)
+    except Exception:
+        print('Algo ha salido mal...')
+
+def import_unidades():
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conexion:
+            cursor = conexion.cursor()
+            # Consulta para obtener los datos de las unidades
+            cursor.execute("SELECT * FROM UNIDAD")
+            unidades = cursor.fetchall()
+
+        unidades_dict={}
+        if unidades:
+            for unidad in unidades:
+                unidades_dict[unidad[0]] = unidad[1],unidad[2],unidad[3]
+            return unidades_dict
+        else:
+            print('No hay unidades registradas')
+    except sqlite3.Error as e:
+        print(e)
+    except Exception:
+        print('Algo ha salido mal...')
+
+def import_prestamos():
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conexion:
+            cursor = conexion.cursor()
+            # Consulta para obtener los datos de los préstamos
+            cursor.execute("SELECT * FROM PRESTAMO")
+            prestamos = cursor.fetchall()
+
+        prestamos_dict={}
+        while True:
+            if prestamos:
+                for prestamo in prestamos: 
+                    prestamos_dict[prestamo[0]] = prestamo[1],prestamo[2],prestamo[3] 
+                else: 
+                    return prestamos_dict
+            else:
+                print('No hay prestamos registrados')
+    except sqlite3.Error as e:
+        print(e)
+    except Exception:
+        print('Algo ha salido mal...')
+
+
 ## MENU DE REPORTES
 def submenu_reportes():
 
@@ -510,7 +572,7 @@ def submenu_reportes():
             ruta.pop()
         elif reporte_opcion == 3:
             ruta.append('Retrasos')
-            retrasos(prestamos,clientes)
+            retrasos(prestamos, clientes)
             ruta.pop()
         elif reporte_opcion == 4:
             ruta.append('Prestamos por retornar')
@@ -1495,6 +1557,9 @@ def exportar_colores_excel(unidades, nombre_archivo="Colores.xlsx"):
    
     
 # Inicio del programa
+clientes = import_clientes()
+unidades = import_unidades()
+prestamos = import_prestamos()
 conteo_colores = cargar_colores_csv()
 conteo_rodadas = cargar_conteo_rodadas()
 rentas = cargar_rentas_csv()
