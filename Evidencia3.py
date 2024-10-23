@@ -515,7 +515,7 @@ def import_unidades():
         unidades_dict={}
         if unidades:
             for unidad in unidades:
-                unidades_dict[unidad[0]] = unidad[1],unidad[2],unidad[3]
+                unidades_dict[unidad[0]] = unidad[1],unidad[2]
             return unidades_dict
         else:
             print('No hay unidades registradas')
@@ -536,7 +536,7 @@ def import_prestamos():
         while True:
             if prestamos:
                 for prestamo in prestamos: 
-                    prestamos_dict[prestamo[0]] = prestamo[1],prestamo[2],prestamo[3] 
+                    prestamos_dict[prestamo[0]] = prestamo[1],prestamo[2],prestamo[3],prestamo[4],prestamo[5],prestamo[6] 
                 else: 
                     return prestamos_dict
             else:
@@ -1559,7 +1559,9 @@ def exportar_colores_excel(unidades, nombre_archivo="Colores.xlsx"):
 # Inicio del programa
 clientes = import_clientes()
 unidades = import_unidades()
+print(unidades)
 prestamos = import_prestamos()
+print(prestamos)
 conteo_colores = cargar_colores_csv()
 conteo_rodadas = cargar_conteo_rodadas()
 rentas = cargar_rentas_csv()
