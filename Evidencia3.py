@@ -1559,9 +1559,7 @@ def exportar_colores_excel(unidades, nombre_archivo="Colores.xlsx"):
 # Inicio del programa
 clientes = import_clientes()
 unidades = import_unidades()
-print(unidades)
 prestamos = import_prestamos()
-print(prestamos)
 conteo_colores = cargar_colores_csv()
 conteo_rodadas = cargar_conteo_rodadas()
 rentas = cargar_rentas_csv()
