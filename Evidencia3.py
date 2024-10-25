@@ -10,8 +10,6 @@ from sqlite3 import Error
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 
-
-
 ruta = []
 try:
     with sqlite3.connect('RentaBicicletas.db') as conn: 
@@ -462,8 +460,8 @@ def menu_retorno():
 
 ## MENU INFORMES
 def menu_informes():
-    mostrar_ruta()
     while True:
+        mostrar_ruta()
         print("\n--- MENÚ INFORMES ---")
         print("1. Reportes")
         print("2. Análisis")
@@ -929,6 +927,7 @@ def tab_unidades_disponibles(unidades, prestamos):
 
 def listado_unidades_reporte():
     while True:
+        mostrar_ruta()
         print("\n--- LISTADO DE UNIDADES ---")
         print("1. Completo")
         print("2. Por rodada")
@@ -1586,8 +1585,8 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
 
 ##Submenú analísis
 def submenu_analisis():
-    mostrar_ruta()
     while True:
+        mostrar_ruta()
         print("\n--- SUBMENÚ ANÁLISIS ---")
         print("1. Duración de los préstamos.")
         print("2. Ranking de clientes.")
@@ -1603,7 +1602,9 @@ def submenu_analisis():
             elif opcion == 2:
                 ranking_clientes()
             elif opcion == 3:
+                ruta.append('Preferencias de Rentas')
                 preferencias_rentas()
+                ruta.pop()
             elif opcion == 4:
                 return False
             else:
@@ -1777,7 +1778,9 @@ def guardar_ranking_csv(df_ranking):
 
 
 ## SUBMENÚ PREFERENCIAS RENTAS
+#checar si debe de volver a preguntar despues de dar un reporte o debe de salir directo al submenu de analisis
 def preferencias_rentas():
+    mostrar_ruta()
     print("Elige el reporte que deseas generar:")
     print("1. Cantidad de préstamos por rodada")
     print("2. Cantidad de préstamos por color")
@@ -2084,9 +2087,7 @@ def prestamos_por_dia_semana():
 # Inicio del programa
 clientes = import_clientes()
 unidades = import_unidades()
-print(unidades)
 prestamos = import_prestamos()
-print(prestamos)
 conteo_colores = cargar_colores_csv()
 conteo_rodadas = cargar_conteo_rodadas()
 rentas = cargar_rentas_csv()
