@@ -664,6 +664,7 @@ def listado_rodada():
 
                     if unidades:
                         exportar_unidades_rodada(opcion_rodada)
+                        break
                     else:
                         print("No se encontraron unidades con la rodada indicada.")
             except Error as e:
@@ -695,6 +696,7 @@ def listado_color():
 
                     if unidades:
                         exportar_unidades_color(opcion_color)
+                        break
                     else:
                         print("No se encontraron unidades con el color indicado.")
             except Error as e:
@@ -881,7 +883,7 @@ def export_excel_unidades_rodada(rodada, name_excel="Unidades_rodada.xlsx"):
     try:
         with sqlite3.connect('RentaBicicletas.db') as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT Clave, Rodada, Color FROM UNIDAD WHERE Rodada = :RODADA ORDER BY Clave" ,{"RODADA": rodada})
+            cursor.execute("SELECT Clave, Rodada, Color FROM UNIDAD WHERE Rodada = :RODADA ORDER BY Clave" ,{"RODADA": int(rodada)})
             unidades = cursor.fetchall()
             
             libro = openpyxl.Workbook()
@@ -940,9 +942,9 @@ def listado_unidades_reporte():
             if opcion == 1:
                 exportar_unidades()
             elif opcion == 2:
-                exportar_unidades_rodada()  
+                listado_rodada()  
             elif opcion == 3:
-                exportar_unidades_color()
+                listado_color()
             elif opcion == 4:
                 return False
             else:
