@@ -1478,9 +1478,10 @@ def preferencias_rentas():
     print("1. Cantidad de préstamos por rodada")
     print("2. Cantidad de préstamos por color")
     print("3. Por días de la semana")
+    print("4. Volver al submenu")
     
     while True:
-        opcion_pref = input("Ingresa una opción (1 o 2): ")
+        opcion_pref = input("Ingresa una de las opciónes mencionadas: ")
         if opcion_pref.isdigit():
             opcion_pref = int(opcion_pref)
             if opcion_pref == 1:
@@ -1491,6 +1492,8 @@ def preferencias_rentas():
                 break
             elif opcion_pref == 3:
                 prestamos_por_dia_semana()
+                break
+            elif opcion_pref == 4:
                 break
             else:
                 print("Opción inválida. Debes ingresar 1 o 2.")
@@ -1755,7 +1758,7 @@ def prestamos_por_dia_semana():
                 fill_value=0
             ).reset_index()
 
-            print("\n--- Reporte de Cantidad de Préstamos por Día de la Semana ---")
+            print("\n--- Reporte de cantidad de préstamos por día de la semana ---")
             print(tabulate(df_dias, headers="keys", tablefmt="rounded_outline", showindex=False))
 
             # Gráfica de barras
@@ -1777,7 +1780,9 @@ def prestamos_por_dia_semana():
 # Inicio del programa
 clientes = import_clientes()
 unidades = import_unidades()
+print(unidades)
 prestamos = import_prestamos()
+print(prestamos)
 conteo_colores = cargar_colores_csv()
 conteo_rodadas = cargar_conteo_rodadas()
 rentas = cargar_rentas_csv()
