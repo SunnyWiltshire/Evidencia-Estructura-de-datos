@@ -8,6 +8,9 @@ import sys
 import sqlite3
 from sqlite3 import Error
 from tabulate import tabulate
+import matplotlib.pyplot as plt
+
+
 
 ruta = []
 try:
@@ -1292,9 +1295,9 @@ def submenu_analisis():
             opcion = int(opcion)
 
             if opcion == 1:
-                duracion_prestamos(prestamos)
+                estadisticas_prestamos()
             elif opcion == 2:
-                ranking_clientes(prestamos, clientes, rentas)
+                ranking_clientes()
             elif opcion == 3:
                 preferencias_rentas()
             elif opcion == 4:
@@ -1303,7 +1306,40 @@ def submenu_analisis():
                 print("Opción invalida, intentalo de nuevo.")
         except ValueError:
             print('Favor de ingresar un valor numerico')
-            
+
+#EV3
+#Datos estadisitcos de la duracion de los prestamos
+def estadisticas_prestamos():
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            query = "SELECT Dias_Prestamo FROM PRESTAMO"
+            df = pd.read_sql_query(query, conn)
+
+            media = df['Dias_Prestamo'].mean()
+            mediana = df['Dias_Prestamo'].median()
+            moda = df['Dias_Prestamo'].mode().tolist()  # La moda puede tener múltiples valores
+            minimo = df['Dias_Prestamo'].min()
+            maximo = df['Dias_Prestamo'].max()
+            desviacion_estandar = df['Dias_Prestamo'].std()
+            cuartiles = df['Dias_Prestamo'].quantile([0.25, 0.5, 0.75])
+
+            print(f"Media: {media}")
+            print(f"Mediana: {mediana}")
+            print(f"Moda: {moda}")
+            print(f"Mínimo: {minimo}")
+            print(f"Máximo: {maximo}")
+            print(f"Desviación estándar: {desviacion_estandar}")
+            print("Cuartiles:")
+            print(cuartiles)
+
+    except sqlite3.Error as e:
+        print(f"Error de base de datos: {e}")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+
+
+
+
 ## SUBMENÚ DURACIÓN DE LOS PRÉSTAMOS
 def duracion_prestamos(prestamos):
     dias_prestamo = [prestamo['Cantidad_dias'] for prestamo in prestamos.values()]
@@ -1362,10 +1398,41 @@ def guardar_rentas_csv(rentas):
     except Exception as e:
         print(f"Ocurrió un error al guardar las rentas: {e}")
     
-## SUBMENÚ RANKING CLIENTES
+#EV3
+#Ranking de clientes, cantidad de prestamos(rentas) que realizo cada cliente.
+def ranking_clientes():
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
 
+            query = """
+                SELECT 
+                    CLIENTES.Clave, 
+                    CLIENTES.Nombres || ' ' || CLIENTES.Apellidos AS Nombre_Completo,
+                    CLIENTES.Telefono,
+                    COUNT(PRESTAMO.Clave_Cliente) AS Cantidad_Rentas
+                FROM CLIENTES
+                JOIN PRESTAMO ON CLIENTES.Clave = PRESTAMO.Clave_Cliente
+                GROUP BY CLIENTES.Clave
+                ORDER BY Cantidad_Rentas DESC;
+            """
+            
+            df = pd.read_sql_query(query, conn)
+
+            print("\n--- Ranking de Clientes ---")
+            headers = ["Clave", "Nombre Completo", "Teléfono", "Cantidad de Rentas"]
+            print(tabulate(df, headers=headers, tablefmt="rounded_outline", showindex=False))
+
+    except sqlite3.Error as e:
+        print(f"Error de base de datos: {e}")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+
+
+
+## SUBMENÚ RANKING CLIENTES
 # Función para generar el ranking de clientes
-def ranking_clientes(prestamos, clientes, rentas):
+def ranking_clientes_old(prestamos, clientes, rentas):
     ranking_data = {
         'Cantidad_rentas': [],
         'Clave_cliente': [],
@@ -1410,16 +1477,20 @@ def preferencias_rentas():
     print("Elige el reporte que deseas generar:")
     print("1. Cantidad de préstamos por rodada")
     print("2. Cantidad de préstamos por color")
+    print("3. Por días de la semana")
     
     while True:
         opcion_pref = input("Ingresa una opción (1 o 2): ")
         if opcion_pref.isdigit():
             opcion_pref = int(opcion_pref)
             if opcion_pref == 1:
-                reporte_prestamos_por_rodada(conteo_rodadas)
+                rodada_tab_count()
                 break
             elif opcion_pref == 2:
-                reporte_colores_tabular_ordenado(unidades)
+                colores_tab_count()
+                break
+            elif opcion_pref == 3:
+                prestamos_por_dia_semana()
                 break
             else:
                 print("Opción inválida. Debes ingresar 1 o 2.")
@@ -1555,7 +1626,154 @@ def exportar_colores_excel(unidades, nombre_archivo="Colores.xlsx"):
     except Exception as e:
         print(f"Error al exportar colores a Excel: {e}")
    
-    
+#EV3
+#Reporte tabular de preferencias del cliente, cantidad de prestamos por color
+#version sin grafica   
+def colores_tab_count1():
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT Color, COUNT(*) as Cantidad FROM UNIDAD GROUP BY Color ORDER BY Cantidad DESC")
+            colores = cursor.fetchall()
+
+            print("\n--- Reporte de Colores de Unidades ---")
+            headers_colores = ["Color", "Cantidad"]
+            print(tabulate(colores, headers=headers_colores, tablefmt="rounded_outline"))
+
+
+    except sqlite3.Error as e:
+        print(f"Error de base de datos: {e}")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+
+#Version final con grafica que corresponde a sus colores
+#Grafica de pastel, colores
+def colores_tab_count():
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
+
+            # Consulta SQL para obtener la cantidad de préstamos por color
+            cursor.execute("SELECT Color, COUNT(*) as Cantidad FROM UNIDAD GROUP BY Color ORDER BY Cantidad DESC")
+            colores = cursor.fetchall()
+
+            # Convertir los resultados a un DataFrame
+            df_colores = pd.DataFrame(colores, columns=["Color", "Cantidad"])
+
+            print("\n--- Reporte de Cantidad de Préstamos por Color ---")
+            print(tabulate(df_colores, headers="keys", tablefmt="rounded_outline", showindex=False))
+
+            # Colores personalizados para la gráfica de pastel
+            color_map = {
+                "ROJO": "red",
+                "AZUL": "blue",
+                "AMARILLO": "yellow",
+                "VERDE": "green",
+                "ROSA": "pink"
+            }
+            # Asignar los colores según el nombre
+            colores_grafica = [color_map[color] for color in df_colores['Color']]
+
+            # Gráfica de pastel
+            plt.figure(figsize=(8, 6))
+            plt.pie(df_colores['Cantidad'], labels=df_colores['Color'], autopct='%1.1f%%', startangle=140, colors=colores_grafica)
+            plt.title('Cantidad de préstamos por color y su proporción')
+            plt.axis('equal')  # Para que el pie sea un círculo
+            plt.show()
+
+    except sqlite3.Error as e:
+        print(f"Error de base de datos: {e}")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+
+
+
+
+#EV3
+#Reporte tabular de preferencias del cliente, cantidad de prestamos por rodada
+def rodada_tab_count():
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT Rodada, COUNT(*) as Cantidad FROM UNIDAD GROUP BY Rodada ORDER BY Cantidad DESC")
+            colores = cursor.fetchall()
+
+            print("\n--- Reporte de Rodadas de Unidades ---")
+            headers_colores = ["Rodada", "Cantidad"]
+            print(tabulate(colores, headers=headers_colores, tablefmt="rounded_outline"))
+
+    except sqlite3.Error as e:
+        print(f"Error de base de datos: {e}")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+
+
+#EV3
+#Reporte tabular por dia de la semana y una grafica de barras
+def prestamos_por_dia_semana():
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
+
+            # Consulta SQL para obtener la cantidad de préstamos por día de la semana
+            query = """
+                SELECT 
+                    strftime('%w', Fecha_Prestamo) AS Dia_Semana, 
+                    COUNT(*) AS Cantidad 
+                FROM 
+                    PRESTAMO 
+                GROUP BY 
+                    Dia_Semana 
+                ORDER BY 
+                    Dia_Semana;
+            """
+            cursor.execute(query)
+            dias = cursor.fetchall()
+
+            # Convertir los resultados a un DataFrame
+            df_dias = pd.DataFrame(dias, columns=["Dia_Semana", "Cantidad"])
+
+            # Mapeo de números de días a nombres de días
+            dia_map = {
+                '0': 'Domingo',
+                '1': 'Lunes',
+                '2': 'Martes',
+                '3': 'Miércoles',
+                '4': 'Jueves',
+                '5': 'Viernes',
+                '6': 'Sábado'
+            }
+
+            # Asignar nombres a los días
+            df_dias['Dia_Semana'] = df_dias['Dia_Semana'].map(dia_map)
+
+            # Reordenar días de la semana
+            df_dias = df_dias.set_index("Dia_Semana").reindex(
+                ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                fill_value=0
+            ).reset_index()
+
+            print("\n--- Reporte de Cantidad de Préstamos por Día de la Semana ---")
+            print(tabulate(df_dias, headers="keys", tablefmt="rounded_outline", showindex=False))
+
+            # Gráfica de barras
+            plt.figure(figsize=(10, 6))
+            plt.bar(df_dias['Dia_Semana'], df_dias['Cantidad'], color='skyblue')
+            plt.xlabel('Día de la Semana')
+            plt.ylabel('Cantidad de Préstamos')
+            plt.title('Cantidad de Préstamos por Día de la Semana')
+            plt.xticks(rotation=45)
+            plt.grid(axis='y')
+            plt.show()
+
+    except sqlite3.Error as e:
+        print(f"Error de base de datos: {e}")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+
+
 # Inicio del programa
 clientes = import_clientes()
 unidades = import_unidades()
