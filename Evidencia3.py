@@ -568,7 +568,7 @@ def submenu_reportes():
             ruta.pop()
         elif reporte_opcion == 2:
             ruta.append('Unidades')
-            exportar_unidades()
+            listado_unidades_reporte()
             ruta.pop()
         elif reporte_opcion == 3:
             ruta.append('Retrasos')
@@ -644,7 +644,309 @@ def exportar_clientes():
     
     # Cerrar la conexión con la base de datos
     conexion.close()
+def listado_rodada(): 
+    while True:
+        opcion_rodada = input("""Escoge una de las rodadas disponibles: 20,26,29: """)
+        
+        if int(opcion_rodada) in [20,26,29]: 
+            try:
+                with sqlite3.connect("RentaBicicletas.db") as conn:
+                    mi_cursor = conn.cursor()
+                    criterios = {"RODADA": opcion_rodada}
+                    mi_cursor.execute("""
+                        SELECT * FROM UNIDAD WHERE Rodada = :RODADA 
+                        ORDER BY Clave;
+                    """, criterios)
+                    unidades = mi_cursor.fetchall()
+
+                    if unidades:
+                        exportar_unidades_rodada(opcion_rodada)
+                    else:
+                        print("No se encontraron unidades con la rodada indicada.")
+            except Error as e:
+                print(e)
+            except:
+                print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        else: 
+            print("Opción invalida")
+
+def listado_color():  
+    while True:
+        opcion_color = input("""Escoge uno de los siguientes colores 
+                              ROJO
+                              AZUL
+                              AMARILLO
+                              VERDE
+                              ROSA: """).upper()
+        
+        if opcion_color in ["ROJO", "AZUL", "AMARILLO", "VERDE", "ROSA"]: 
+            try:
+                with sqlite3.connect("RentaBicicletas.db") as conn:
+                    mi_cursor = conn.cursor()
+                    criterios = {"COLOR": opcion_color}
+                    mi_cursor.execute("""
+                        SELECT * FROM UNIDAD WHERE Color = :COLOR 
+                        ORDER BY Clave;
+                    """, criterios)
+                    unidades = mi_cursor.fetchall()
+
+                    if unidades:
+                        exportar_unidades_color(opcion_color)
+                    else:
+                        print("No se encontraron unidades con el color indicado.")
+            except Error as e:
+                print(e)
+            except:
+                print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
+        else: 
+            print("Opción invalida")
+
+def export_csv_unidades_color(color): 
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM UNIDAD WHERE Color = :COLOR ORDER BY Clave" ,{"COLOR": color})
+            unidades = cursor.fetchall()
+
+            with open("Unidades_bicicletas_color.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
+                grabador = csv.writer(archivocsv_unidades)
+                grabador.writerow(("Clave", "Rodada", "Color"))
+                grabador.writerows(unidades)
+
+            print("Datos exportados con éxito en Unidades_bicicletas_rodada.csv")
+
+    except sqlite3.Error as e:
+        print(f"Error al exportar a CSV: {e}")
+
+def export_excel_unidades_color(color, name_excel="Unidades_color.xlsx"): 
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT Clave, Rodada, Color FROM UNIDAD WHERE Color = :COLOR ORDER BY Clave" ,{"COLOR": color})
+            unidades = cursor.fetchall()
+            
+            libro = openpyxl.Workbook()
+            hoja = libro.active
+            hoja.title = "Unidades"
+            
+            # Encabezados
+            hoja["A1"].value = "Clave"
+            hoja["B1"].value = "Rodada"
+            hoja["C1"].value = "Color"
+
+            # Estilos en los encabezados
+            hoja["A1"].font = Font(bold=True)
+            hoja["B1"].font = Font(bold=True)
+            hoja["C1"].font = Font(bold=True)
+
+            for i, (Clave, Rodada, Color) in enumerate(unidades, start=2):
+                hoja.cell(row=i, column=1).value = Clave
+                hoja.cell(row=i, column=2).value = Rodada
+                hoja.cell(row=i, column=3).value = Color
+                
+            ajustar_ancho_columnas(hoja)
+            libro.save(name_excel)
+            print(f"Datos exportados con éxito en {name_excel}")
+    except sqlite3.Error as e:
+        print(f"Error al exportar a Excel: {e}")
+        raise
+
+def export_csv_unidades_rodada(rodada):
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM UNIDAD WHERE Rodada = :RODADA ORDER BY Clave" ,{"RODADA": rodada})
+            unidades = cursor.fetchall()
+
+            with open("Unidades_bicicletas_rodada.csv", "w", encoding="latin1", newline="") as archivocsv_unidades:
+                grabador = csv.writer(archivocsv_unidades)
+                grabador.writerow(("Clave", "Rodada", "Color"))
+                grabador.writerows(unidades)
+
+            print("Datos exportados con éxito en Unidades_bicicletas_rodada.csv")
+
+    except sqlite3.Error as e:
+        print(f"Error al exportar a CSV: {e}")
+
+def exportar_unidades_color(color):
+    # Conectar a la base de datos SQLite
+    conexion = sqlite3.connect('RentaBicicletas.db')
+    cursor = conexion.cursor()
+
+    # Consulta para obtener las unidades
+    cursor.execute("SELECT * FROM UNIDAD WHERE Color = :COLOR ORDER BY Clave", {"COLOR": color})
+    unidades = cursor.fetchall()
+
+    if unidades:  # Si hay unidades en la base de datos
+        # Mostrar el reporte tabular con la librería 'tabulate'
+        headers = ["Clave", "Rodada", "Color"]
+        print(tabulate(unidades, headers, tablefmt="rounded_outline"))
+
+        while True:
+            try:
+                export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4. Salir al submenú\n"))
+
+                # Exportar en formato CSV
+                if export_opcion == 1:
+                    export_csv_unidades_color(color)
+                
+                # Exportar en formato Excel
+                elif export_opcion == 2:
+                    export_excel_unidades_color(color)
+                
+                # Exportar en ambos formatos, CSV y Excel
+                elif export_opcion == 3:
+                    export_csv_unidades_color(color)
+                    export_csv_unidades_color(color)
+                
+                # Salir al submenú
+                elif export_opcion == 4:
+                    break
+                
+                else:
+                    print("Elige una opción válida.")
+                    if cancelar():
+                        break
+            except ValueError:
+                print("Error: Debes ingresar un número entero que sea válido.")
+                if cancelar():
+                    break
+            except Exception as name_error:
+                print(f"Ha ocurrido un error inesperado: {name_error}")
+                if cancelar():
+                    break
+    else:
+        print("No hay unidades para exportar.")
     
+    # Cerrar la conexión con la base de datos
+    conexion.close()
+
+def exportar_unidades_rodada(rodada):
+    # Conectar a la base de datos SQLite
+    conexion = sqlite3.connect('RentaBicicletas.db')
+    cursor = conexion.cursor()
+
+    # Consulta para obtener las unidades
+    cursor.execute("SELECT * FROM UNIDAD WHERE Rodada = :RODADA ORDER BY Clave", {"RODADA": rodada})
+    unidades = cursor.fetchall()
+
+    if unidades:  # Si hay unidades en la base de datos
+        # Mostrar el reporte tabular con la librería 'tabulate'
+        headers = ["Clave", "Rodada", "Color"]
+        print(tabulate(unidades, headers, tablefmt="rounded_outline"))
+
+        while True:
+            try:
+                export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4. Salir al submenú\n"))
+
+                # Exportar en formato CSV
+                if export_opcion == 1:
+                    export_csv_unidades_rodada(rodada)
+                
+                # Exportar en formato Excel
+                elif export_opcion == 2:
+                    export_excel_unidades_rodada(rodada)
+                
+                # Exportar en ambos formatos, CSV y Excel
+                elif export_opcion == 3:
+                    export_csv_unidades_rodada(rodada)
+                    export_csv_unidades_rodada(rodada)
+                
+                # Salir al submenú
+                elif export_opcion == 4:
+                    break
+                
+                else:
+                    print("Elige una opción válida.")
+                    if cancelar():
+                        break
+            except ValueError:
+                print("Error: Debes ingresar un número entero que sea válido.")
+                if cancelar():
+                    break
+            except Exception as name_error:
+                print(f"Ha ocurrido un error inesperado: {name_error}")
+                if cancelar():
+                    break
+    else:
+        print("No hay unidades para exportar.")
+    
+    # Cerrar la conexión con la base de datos
+    conexion.close()
+
+def export_excel_unidades_rodada(rodada, name_excel="Unidades_rodada.xlsx"):
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT Clave, Rodada, Color FROM UNIDAD WHERE Rodada = :RODADA ORDER BY Clave" ,{"RODADA": rodada})
+            unidades = cursor.fetchall()
+            
+            libro = openpyxl.Workbook()
+            hoja = libro.active
+            hoja.title = "Unidades"
+            
+            # Encabezados
+            hoja["A1"].value = "Clave"
+            hoja["B1"].value = "Rodada"
+            hoja["C1"].value = "Color"
+
+            # Estilos en los encabezados
+            hoja["A1"].font = Font(bold=True)
+            hoja["B1"].font = Font(bold=True)
+            hoja["C1"].font = Font(bold=True)
+
+            for i, (Clave, Rodada, Color) in enumerate(unidades, start=2):
+                hoja.cell(row=i, column=1).value = Clave
+                hoja.cell(row=i, column=2).value = Rodada
+                hoja.cell(row=i, column=3).value = Color
+                
+            ajustar_ancho_columnas(hoja)
+            libro.save(name_excel)
+            print(f"Datos exportados con éxito en {name_excel}")
+    except sqlite3.Error as e:
+        print(f"Error al exportar a Excel: {e}")
+        raise
+
+def tab_unidades_disponibles(unidades, prestamos):
+    print("-----UNIDADES DISPONIBLES-----")
+    print(f"{'Clave':^8}{'Rodada': <10}{'Color'}")
+    print("=" * 30)
+    
+    # Crear un conjunto de unidades utilizadas, asegurando que sean del mismo tipo que las claves de 'unidades'
+    unidades_utilizadas = {str(datos['Clave_unidad']) for datos in prestamos.values()}  # Convertimos a string
+    
+    # Iterar sobre las unidades y mostrar solo las que no están utilizadas
+    for clave, datos in unidades.items():
+        if str(clave) not in unidades_utilizadas:  # Convertimos clave a string para comparar
+            print(f"{clave:^8}{datos[0]: <10}{datos[1]}")
+    
+    print("=" * 30)
+
+def listado_unidades_reporte():
+    while True:
+        print("\n--- LISTADO DE UNIDADES ---")
+        print("1. Completo")
+        print("2. Por rodada")
+        print("3. Por color")
+        print("4. Volver al menú de listado de unidades\n")
+
+        try:
+            opcion = input("Elige una de las siguientes opciones: ")
+            opcion = int(opcion)
+
+            if opcion == 1:
+                exportar_unidades()
+            elif opcion == 2:
+                exportar_unidades_rodada()  
+            elif opcion == 3:
+                exportar_unidades_color()
+            elif opcion == 4:
+                return False
+            else:
+                print("Opción invalida, intentalo de nuevo.")
+        except ValueError:
+            print('Favor de ingresar un valor numerico')
+
 def exportar_unidades():
     # Conectar a la base de datos SQLite
     conexion = sqlite3.connect('RentaBicicletas.db')
