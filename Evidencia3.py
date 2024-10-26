@@ -33,7 +33,7 @@ try:
             Clave_Unidad INTEGER NOT NULL, \
             FOREIGN KEY (Clave_Cliente) REFERENCES CLIENTES(Clave), \
             FOREIGN KEY (Clave_Unidad) REFERENCES UNIDAD(Clave));")
-        print("Base de datos y tablas creadas exitosamente.") 
+        
 except Error as e:
     print(e)
 except Exception:
@@ -614,15 +614,18 @@ def exportar_clientes():
                 # Exportar en formato CSV
                 if export_opcion == 1:
                     export_csv_clientes()
+                    break
                 
                 # Exportar en formato Excel
                 elif export_opcion == 2:
                     export_excel_clientes()
+                    break
                 
                 # Exportar en ambos formatos, CSV y Excel
                 elif export_opcion == 3:
                     export_csv_clientes()
                     export_excel_clientes()
+                    break
                 
                 # Salir al submenú
                 elif export_opcion == 4:
@@ -792,16 +795,18 @@ def exportar_unidades_color(color):
                 # Exportar en formato CSV
                 if export_opcion == 1:
                     export_csv_unidades_color(color)
+                    break
                 
                 # Exportar en formato Excel
                 elif export_opcion == 2:
                     export_excel_unidades_color(color)
+                    break
                 
                 # Exportar en ambos formatos, CSV y Excel
                 elif export_opcion == 3:
                     export_csv_unidades_color(color)
                     export_csv_unidades_color(color)
-                
+                    break
                 # Salir al submenú
                 elif export_opcion == 4:
                     break
@@ -845,16 +850,17 @@ def exportar_unidades_rodada(rodada):
                 # Exportar en formato CSV
                 if export_opcion == 1:
                     export_csv_unidades_rodada(rodada)
+                    break
                 
                 # Exportar en formato Excel
                 elif export_opcion == 2:
                     export_excel_unidades_rodada(rodada)
-                
+                    break
                 # Exportar en ambos formatos, CSV y Excel
                 elif export_opcion == 3:
                     export_csv_unidades_rodada(rodada)
                     export_csv_unidades_rodada(rodada)
-                
+                    break
                 # Salir al submenú
                 elif export_opcion == 4:
                     break
@@ -972,16 +978,17 @@ def exportar_unidades():
                 # Exportar en formato CSV
                 if export_opcion == 1:
                     export_csv_unidades()
+                    break
                 
                 # Exportar en formato Excel
                 elif export_opcion == 2:
                     export_excel_unidades()
-                
+                    break
                 # Exportar en ambos formatos, CSV y Excel
                 elif export_opcion == 3:
                     export_csv_unidades()
                     export_excel_unidades()
-                
+                    break
                 # Salir al submenú
                 elif export_opcion == 4:
                     break
@@ -1351,11 +1358,14 @@ def reporte_prestamos_por_retornar():
                 export_opcion = int(input("\nElige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4. No deseo exportarlo\n"))
                 if export_opcion == 1:
                     export_csv_prestamos_retornar(fecha_inicial, fecha_final)
+                    break
                 elif export_opcion == 2:
                     export_excel_prestamos_retornar(fecha_inicial, fecha_final)
+                    break
                 elif export_opcion == 3:
                     export_csv_prestamos_retornar(fecha_inicial, fecha_final)
                     export_excel_prestamos_retornar(fecha_inicial, fecha_final)
+                    break
                 elif export_opcion == 4:
                     break
                 else:
