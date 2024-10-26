@@ -2088,8 +2088,5 @@ def prestamos_por_dia_semana():
 clientes = import_clientes()
 unidades = import_unidades()
 prestamos = import_prestamos()
-conteo_colores = cargar_colores_csv()
-conteo_rodadas = cargar_conteo_rodadas()
-rentas = cargar_rentas_csv()
 print("===== BIENVENIDO A NUESTRA RENTA DE BICICLETAS =====")
 menu_principal()
