@@ -1,14 +1,16 @@
 import csv
-from datetime import datetime, timedelta
-import openpyxl
-from openpyxl.styles import Font 
-import pandas as pd
+import datetime
+import matplotlib.pyplot as plt
 import numpy as np
-import sys
+import openpyxl
+from openpyxl import load_workbook
+from openpyxl.styles import Font
+import pandas as pd
 import sqlite3
 from sqlite3 import Error
 from tabulate import tabulate
-import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+import sys
 
 ruta = []
 try:
@@ -33,7 +35,7 @@ try:
             Clave_Unidad INTEGER NOT NULL, \
             FOREIGN KEY (Clave_Cliente) REFERENCES CLIENTES(Clave), \
             FOREIGN KEY (Clave_Unidad) REFERENCES UNIDAD(Clave));")
-        
+        print("Base de datos y tablas creadas exitosamente.") 
 except Error as e:
     print(e)
 except Exception:
@@ -64,7 +66,7 @@ def menu_principal():
                 menu_registro()
                 ruta.pop()
             elif opcion == 2:
-                ruta.append("Prestamo")
+                ruta.append("Préstamo")
                 registrar_prestamo()
                 ruta.pop()
             elif opcion == 3:
@@ -83,11 +85,11 @@ def menu_principal():
                 elif confirmacion == "N":
                     return
                 else:
-                    print("Opción invalida, ingrese los valores de 'S' o 'N'.")
+                    print("Opción inválida, ingrese los valores de 'S' o 'N'.")
             else:
-                print("Opción invalida, intentalo de nuevo.")
+                print("Opción inválida, inténtalo de nuevo.")
         except ValueError:
-            print('Favor de ingresar un valor numerico')
+            print('Favor de ingresar un valor numérico')
 
 #funcion que pregunta al usuario si desea cancelar la accion que estaba haciendo
 def cancelar():
@@ -95,14 +97,14 @@ def cancelar():
         try:
             respuesta = int(input("\nHa ocurrido un error. ¿Deseas cancelar o intentar de nuevo? \n1: cancelar  \n2: intentar de nuevo \n"))
             if respuesta == 1:
-                print("Operacion cancelada.")
+                print("Operación cancelada.")
                 return True
             elif respuesta == 2:
                 return False
             else:
-                print("Opción no valida. Por favor, selecciona 1 para cancelar o 2 para intentar de nuevo.")
+                print("Opción no válida. Por favor, selecciona 1 para cancelar o 2 para intentar de nuevo.")
         except ValueError:
-            print('Favor de ingresar un valor numerico')
+            print('Favor de ingresar un valor numérico')
             
 #funcion que despliega el sub menú de registro
 def menu_registro():
@@ -111,7 +113,7 @@ def menu_registro():
         print("\n--- SUBMENÚ REGISTRO ---")
         print("1. Registrar una unidad")
         print("2. Registrar un cliente")
-        print("3. Volver al menu principal\n")
+        print("3. Volver al menú principal\n")
 
         try:
             opcion = input("Elige una opción: ")
@@ -128,7 +130,7 @@ def menu_registro():
             elif opcion == 3:
                 break
             else:
-                print("Opción invalida, intentalo de nuevo.")
+                print("Opción inválida, inténtalo de nuevo.")
         except ValueError:
             if cancelar():
                 break
@@ -165,7 +167,7 @@ def registro_Unidad():
                                     # Insertar los datos en la tabla UNIDAD
                                     cursor.execute("INSERT INTO UNIDAD (Clave, Rodada, Color) VALUES (?, ?, ?)", 
                                                    (clave, rodada, color))
-                                    conn.commit()  # Confirmar la transacción
+                                    conn.commit() 
 
                                     print(f"Unidad registrada con éxito. Clave: {clave}, Rodada: {rodada}, Color: {color}")
                                     return False
@@ -247,7 +249,7 @@ def registro_Cliente():
                     # Insertar el cliente en la tabla CLIENTES
                     cursor.execute("INSERT INTO CLIENTES (Clave, Apellidos, Nombres, Telefono) VALUES (?, ?, ?, ?)", 
                                    (clave_cliente, apellidos, nombre, telefono))
-                    conn.commit()  # Confirmar la transacción
+                    conn.commit()  
 
                     print(f"Cliente registrado con éxito. Clave: {clave_cliente}, Nombre: {nombre} {apellidos}, Teléfono: {telefono}")
                     
@@ -333,13 +335,17 @@ def registrar_prestamo():
 
                     # Cantidad de días del préstamo
                     while True:
-                        Cantidad_de_dias = input("¿Cuántos días de préstamo solicitas?: ")
-                        if Cantidad_de_dias.isdigit() and int(Cantidad_de_dias) > 0:
+                        Cantidad_de_dias = input("¿Cuántos días de préstamo solicitas? (1-14): ")
+                        if Cantidad_de_dias.isdigit():
                             Cantidad_de_dias = int(Cantidad_de_dias)
-                            fecha_de_retorno = fecha_prestamo + timedelta(days=Cantidad_de_dias)
-                            print(f"La fecha en la que se debe regresar la unidad es el: {fecha_de_retorno.strftime('%m/%d/%Y')}")
-                            break
-                        print("La cantidad de días debe ser un número mayor a 0.")
+                            if 1 <= Cantidad_de_dias <= 14:
+                                fecha_de_retorno = fecha_prestamo + timedelta(days=Cantidad_de_dias)
+                                print(f"La fecha en la que se debe regresar la unidad es el: {fecha_de_retorno.strftime('%m/%d/%Y')}")
+                                break
+                            else:
+                                print("La cantidad de días debe estar entre 1 y 14.")
+                        else:
+                            print("La cantidad de días debe ser un número.")
                         if cancelar(): return
 
                     # Registro del préstamo en la base de datos
@@ -482,9 +488,9 @@ def menu_informes():
             elif opcion == 3:
                 return False
             else:
-                print("Opción invalida, intentalo de nuevo.")
+                print("Opción inválida, inténtalo de nuevo.")
         except ValueError:
-            print('Favor de ingresar un valor numerico')
+            print('Favor de ingresar un valor numérico')
 
 def import_clientes():
     try:
@@ -541,7 +547,8 @@ def import_prestamos():
                 else: 
                     return prestamos_dict
             else:
-                print('No hay prestamos registrados')
+                print('No hay préstamos registrados')
+            break
     except sqlite3.Error as e:
         print(e)
     except Exception:
@@ -565,7 +572,7 @@ def submenu_reportes():
         reporte_opcion = int(input("Elige alguna de las opciones mencionadas: "))
         if reporte_opcion == 1:
             ruta.append('Clientes')
-            exportar_clientes()
+            submenu_clientes()
             ruta.pop()
         elif reporte_opcion == 2:
             ruta.append('Unidades')
@@ -573,15 +580,15 @@ def submenu_reportes():
             ruta.pop()
         elif reporte_opcion == 3:
             ruta.append('Retrasos')
-            retrasos(prestamos, clientes)
+            reporte_retrasos()
             ruta.pop()
         elif reporte_opcion == 4:
-            ruta.append('Prestamos por retornar')
-            reporte_prestamos_por_retornar(prestamos)
+            ruta.append('Préstamos por retornar')
+            reporte_prestamos_por_retornar()
             ruta.pop()
         elif reporte_opcion == 5:
-            ruta.append('Prestamos por periodo')
-            prestamos_por_periodo(prestamos)
+            ruta.append('Préstamos por periodo')
+            reporte_prestamos_por_periodo()
             ruta.pop()
         elif reporte_opcion == 6:
             return False    
@@ -592,8 +599,43 @@ def submenu_reportes():
         if cancelar():
             break
 
+
+
+def submenu_clientes():
+    mostrar_ruta()
+    while True:
+        print("\n---- CLIENTES ----")
+        print("1. Reporte completo de clientes")
+        print("2. Cliente específico")
+        print("3. Regresar al menú principal")  
+        try:
+            opcion_clientes = input("Ingresa una opción (1, 2 o 3): ")
+            opcion_clientes = int(opcion_clientes)  # Convertir a entero
+
+            if opcion_clientes == 1:
+                ruta.append("Reporte completo de clientes")
+                exportar_clientes()
+                ruta.pop()  # Eliminar la última entrada de la ruta
+            elif opcion_clientes == 2:
+                ruta.append("Cliente específico")
+                cliente_especifico()  # Llamar a la función para mostrar historial del cliente
+                ruta.pop()  # Eliminar la última entrada de la ruta
+            elif opcion_clientes == 3:
+                print("Regresando al menú principal...")
+                break  # Salir del bucle para regresar al menú principal
+            else:
+                print("Opción incorrecta. Por favor, ingresa una opción válida (1, 2 o 3).")
+        except ValueError:
+            print("Favor de ingresar un valor numérico.")
+        except Exception as e:
+            print(f"Ocurrió un problema: {e}")
+
+
+
+
 ## SUBMENU REPORTES CLIENTES
 def exportar_clientes():
+    mostrar_ruta()
     # Conectar a la base de datos SQLite
     conexion = sqlite3.connect('RentaBicicletas.db')
     cursor = conexion.cursor()
@@ -614,18 +656,15 @@ def exportar_clientes():
                 # Exportar en formato CSV
                 if export_opcion == 1:
                     export_csv_clientes()
-                    break
                 
                 # Exportar en formato Excel
                 elif export_opcion == 2:
                     export_excel_clientes()
-                    break
                 
                 # Exportar en ambos formatos, CSV y Excel
                 elif export_opcion == 3:
                     export_csv_clientes()
                     export_excel_clientes()
-                    break
                 
                 # Salir al submenú
                 elif export_opcion == 4:
@@ -648,7 +687,103 @@ def exportar_clientes():
     
     # Cerrar la conexión con la base de datos
     conexion.close()
-def listado_rodada(): 
+
+
+def exportar_clientes2():
+    mostrar_ruta()
+    # Conectar a la base de datos SQLite
+    conexion = sqlite3.connect('RentaBicicletas.db')
+    cursor = conexion.cursor()
+
+    # Consulta para obtener los clientes
+    cursor.execute("SELECT * FROM CLIENTES")
+    clientes = cursor.fetchall()
+
+    if clientes:  # Si hay clientes en la base de datos
+        # Mostrar el reporte tabular con la librería 'tabulate'
+        headers = ["Clave", "Apellidos", "Nombres", "Teléfono"]
+        print(tabulate(clientes, headers, tablefmt="rounded_outline"))
+
+        
+    else:
+        print("No hay clientes para exportar.")
+    
+    # Cerrar la conexión con la base de datos
+    conexion.close()
+
+
+
+
+def cliente_especifico():
+    try:
+        exportar_clientes2()
+        # Solicitar clave del cliente
+        clave_cliente = input("Introduce la clave del cliente para ver su historial: ")
+        
+        # Verificar que la clave sea un número válido
+        if not clave_cliente.isdigit():
+            print("La clave del cliente debe ser un número.")
+            return
+        
+        clave_cliente = int(clave_cliente)
+
+        # Conectar a la base de datos
+        with sqlite3.connect('RentaBicicletas.db') as conn:
+            cursor = conn.cursor()
+
+            # Obtener detalles del cliente
+            cursor.execute("SELECT Clave, Apellidos, Nombres, Telefono FROM CLIENTES WHERE Clave=?", (clave_cliente,))
+            cliente = cursor.fetchone()
+            
+            if cliente:
+                # Mostrar detalles del cliente en formato tabular
+                print(f"\n--- Detalles del Cliente ---")
+                headers_cliente = ["Clave", "Apellidos", "Nombres", "Teléfono"]
+                cliente_info = [[cliente[0], cliente[1], cliente[2], cliente[3]]]
+                print(tabulate(cliente_info, headers=headers_cliente, tablefmt="rounded_outline"))
+                
+                # Obtener el historial de préstamos del cliente
+                cursor.execute("""
+                    SELECT Folio, Fecha_Prestamo, Dias_Prestamo, Fecha_Retorno, Retorno, Clave_Unidad 
+                    FROM PRESTAMO 
+                    WHERE Clave_Cliente=?
+                    ORDER BY Fecha_Prestamo ASC
+                """, (clave_cliente,))
+                prestamos = cursor.fetchall()
+                
+                # Comprobar si existen préstamos
+                if prestamos:
+                    # Mostrar el historial de préstamos en formato tabular
+                    print("\n--- Historial de Préstamos ---")
+                    headers_prestamos = ["Folio", "Fecha Préstamo", "Días Préstamo", "Fecha Retorno", "Devuelto", "Clave Unidad"]
+                    tabla_prestamos = [
+                        [p[0], 
+                         datetime.strptime(p[1], "%Y-%m-%d").strftime("%d/%m/%Y"), 
+                         p[2], 
+                         datetime.strptime(p[3], "%Y-%m-%d").strftime("%d/%m/%Y"),
+                         "Sí" if p[4] else "No", 
+                         p[5]] 
+                        for p in prestamos
+                    ]
+                    print(tabulate(tabla_prestamos, headers=headers_prestamos, tablefmt="rounded_outline"))
+                else:
+                    print("No se encontraron préstamos para este cliente.")
+            else:
+                print("La clave del cliente no es válida o no existe.")
+                
+    except Error as e:
+        print(f"Error de base de datos: {e}")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+
+
+
+
+
+
+
+def listado_rodada():
+    mostrar_ruta()
     while True:
         opcion_rodada = input("""Escoge una de las rodadas disponibles: 20,26,29: """)
         
@@ -673,9 +808,10 @@ def listado_rodada():
             except:
                 print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         else: 
-            print("Opción invalida")
+            print("Opción inválida")
 
 def listado_color():  
+    mostrar_ruta()
     while True:
         opcion_color = input("""Escoge uno de los siguientes colores 
                               ROJO
@@ -705,7 +841,7 @@ def listado_color():
             except:
                 print(f"Se produjo el siguiente error: {sys.exc_info()[0]}")
         else: 
-            print("Opción invalida")
+            print("Opción inválida")
 
 def export_csv_unidades_color(color): 
     try:
@@ -795,18 +931,16 @@ def exportar_unidades_color(color):
                 # Exportar en formato CSV
                 if export_opcion == 1:
                     export_csv_unidades_color(color)
-                    break
                 
                 # Exportar en formato Excel
                 elif export_opcion == 2:
                     export_excel_unidades_color(color)
-                    break
                 
                 # Exportar en ambos formatos, CSV y Excel
                 elif export_opcion == 3:
                     export_csv_unidades_color(color)
                     export_csv_unidades_color(color)
-                    break
+                
                 # Salir al submenú
                 elif export_opcion == 4:
                     break
@@ -850,17 +984,16 @@ def exportar_unidades_rodada(rodada):
                 # Exportar en formato CSV
                 if export_opcion == 1:
                     export_csv_unidades_rodada(rodada)
-                    break
                 
                 # Exportar en formato Excel
                 elif export_opcion == 2:
                     export_excel_unidades_rodada(rodada)
-                    break
+                
                 # Exportar en ambos formatos, CSV y Excel
                 elif export_opcion == 3:
                     export_csv_unidades_rodada(rodada)
                     export_csv_unidades_rodada(rodada)
-                    break
+                
                 # Salir al submenú
                 elif export_opcion == 4:
                     break
@@ -945,19 +1078,26 @@ def listado_unidades_reporte():
             opcion = int(opcion)
 
             if opcion == 1:
+                ruta.append('Completo')
                 exportar_unidades()
+                ruta.pop()
             elif opcion == 2:
+                ruta.append('Por rodada')
                 listado_rodada()  
+                ruta.pop()
             elif opcion == 3:
+                ruta.append('Por color')
                 listado_color()
+                ruta.pop()
             elif opcion == 4:
                 return False
             else:
-                print("Opción invalida, intentalo de nuevo.")
+                print("Opción inválida, inténtalo de nuevo.")
         except ValueError:
-            print('Favor de ingresar un valor numerico')
+            print('Favor de ingresar un valor numérico')
 
 def exportar_unidades():
+    mostrar_ruta()
     # Conectar a la base de datos SQLite
     conexion = sqlite3.connect('RentaBicicletas.db')
     cursor = conexion.cursor()
@@ -978,17 +1118,16 @@ def exportar_unidades():
                 # Exportar en formato CSV
                 if export_opcion == 1:
                     export_csv_unidades()
-                    break
                 
                 # Exportar en formato Excel
                 elif export_opcion == 2:
                     export_excel_unidades()
-                    break
+                
                 # Exportar en ambos formatos, CSV y Excel
                 elif export_opcion == 3:
                     export_csv_unidades()
                     export_excel_unidades()
-                    break
+                
                 # Salir al submenú
                 elif export_opcion == 4:
                     break
@@ -1175,428 +1314,318 @@ def export_excel_clientes(name_excel="Clientes.xlsx"):
         print(f"Error al exportar a Excel: {e}")
 
 ## SUBMENU LISTADO DE UNIDADES
-def listado_unidades():
-    while True:
-        print("\n--- LISTADO DE UNIDADES ---")
-        print("1. Completo")
-        print("2. Por rodada")
-        print("3. Por color")
-        print("4. Volver al menú de listado de unidades\n")
-
-        try:
-            opcion = input("Elige una de las siguientes opciones: ")
-            opcion = int(opcion)
-
-            if opcion == 1:
-                analisis_completo()
-            elif opcion == 2:
-                analisis_rodada()
-            elif opcion == 3:
-                analisis_color()
-            elif opcion == 4:
-                return False
-            else:
-                print("Opción invalida, intentalo de nuevo.")
-        except ValueError:
-            print('Favor de ingresar un valor numerico')
-
-## SUBMENU RETRASOS
-def retrasos(prestamos,clientes):
+ 
+#EV3
+def reporte_retrasos():
     mostrar_ruta()
-    if prestamos:
-        print(f"{'Folio':^8}{'Nombre del Cliente': <30}{'Fecha Préstamo': <20}{'Fecha Retorno': <20}{'Días de Retraso'}")
-        print("=" * 100)
+    try:
+        # Solicitar la conexión y obtener los datos de retraso
+        with sqlite3.connect("RentaBicicletas.db", 
+                             detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as conn:
+            mi_cursor = conn.cursor()
+            
+            # Obtener la fecha actual
+            today = datetime.now().date()
+            
+            # Consulta SQL para obtener préstamos con retraso
+            mi_cursor.execute("""
+                SELECT 
+                    julianday(?) - julianday(PRESTAMO.Fecha_Retorno) AS Dias_Retrasados,
+                    PRESTAMO.Fecha_Retorno, 
+                    PRESTAMO.Clave_Unidad, 
+                    UNIDAD.Rodada, 
+                    UNIDAD.Color, 
+                    CLIENTES.Nombres || ' ' || CLIENTES.Apellidos AS Nombre_Completo, 
+                    CLIENTES.Telefono
+                FROM 
+                    PRESTAMO
+                JOIN 
+                    CLIENTES ON PRESTAMO.Clave_Cliente = CLIENTES.Clave
+                JOIN 
+                    UNIDAD ON PRESTAMO.Clave_Unidad = UNIDAD.Clave
+                WHERE 
+                    PRESTAMO.Retorno = 0 AND 
+                    julianday(?) > julianday(PRESTAMO.Fecha_Retorno)
+                ORDER BY 
+                    Dias_Retrasados DESC
+            """, (today, today))
 
-        fecha_actual = datetime.now().date()
-        for folio, datos in prestamos.items():
-            fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date()
-            if fecha_actual > fecha_retorno:
-                cliente_clave = int(datos['Clave_cliente'])
-                cliente = clientes.get(cliente_clave)
-                if cliente:
-                    nombre, apellido = cliente[1], cliente[0]
-                    dias_retraso = (fecha_actual - fecha_retorno).days
-                    print(f"{folio:^8}{nombre + ' ' + apellido: <30}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']: <20}{dias_retraso}")
+            registros = mi_cursor.fetchall()
+
+            # Formatear los resultados
+            if registros:
+                registros_formateados = []
+                for dias_retrasados, fecha_retorno, clave_unidad, rodada, color, nombre_completo, telefono in registros:
+                    if isinstance(fecha_retorno, str):
+                        fecha_retorno = datetime.strptime(fecha_retorno, "%Y-%m-%d")
+                    fecha_retorno_formateada = fecha_retorno.strftime("%m/%d/%Y")
+                    registros_formateados.append(
+                        [int(dias_retrasados), fecha_retorno_formateada, clave_unidad, rodada, color, nombre_completo, telefono]
+                    )
+
+                headers = ["Días de Retraso", "Fecha de Retorno", "Clave de Unidad", "Rodada", "Color", "Nombre Completo", "Teléfono"]
+                print("\n--- Reporte de Préstamos con Retraso ---")
+                print(tabulate(registros_formateados, headers=headers, tablefmt="rounded_outline"))
+
+                # Preguntar si se desea exportar
+                export_option = input("\n¿Desea exportar el reporte? (1: CSV, 2: Excel, 3: Ambas, 4: No exportar): ")
+                
+                # Crear DataFrame para exportar
+                df = pd.DataFrame(registros_formateados, columns=headers)
+                
+                # Exportar según la elección
+                if export_option == "1":
+                    df.to_csv("reporte_retrasos.csv", index=False)
+                    print("Reporte exportado a 'reporte_retrasos.csv'.")
+                elif export_option == "2":
+                    df.to_excel("reporte_retrasos.xlsx", index=False, engine="openpyxl")
+                    # Ajustar columnas en el archivo Excel
+                    with pd.ExcelWriter("reporte_retrasos.xlsx", engine="openpyxl", mode="a") as writer:
+                        wb = writer.book
+                        ws = wb.active
+                        for column in ws.columns:
+                            max_length = max(len(str(cell.value)) for cell in column if cell.value) + 2
+                            ws.column_dimensions[column[0].column_letter].width = max_length
+                    print("Reporte exportado a 'reporte_retrasos.xlsx'.")
+                elif export_option == "3":
+                    df.to_csv("reporte_retrasos.csv", index=False)
+                    df.to_excel("reporte_retrasos.xlsx", index=False, engine="openpyxl")
+                    # Ajustar columnas en el archivo Excel
+                    with pd.ExcelWriter("reporte_retrasos.xlsx", engine="openpyxl", mode="a") as writer:
+                        wb = writer.book
+                        ws = wb.active
+                        for column in ws.columns:
+                            max_length = max(len(str(cell.value)) for cell in column if cell.value) + 2
+                            ws.column_dimensions[column[0].column_letter].width = max_length
+                    print("Reporte exportado a 'reporte_retrasos.csv' y 'reporte_retrasos.xlsx'.")
+                elif export_option == "4":
+                    print("No se exportó el reporte.")
                 else:
-                    print("Ha ocurrido un problema")
+                    print("Opción no válida. No se exportó el reporte.")
 
-        print("=" * 100)
-        exportar_opcion = int(input("Elige una opción para exportar: \n1. CSV\n2. Excel\n3. Ambos\n 4.No deseo exportarlo "))
-        if exportar_opcion == 1:
-            export_csv_retrasos(prestamos, fecha_actual)
-        elif exportar_opcion == 2:
-            export_excel_retrasos(prestamos, fecha_actual)
-        elif exportar_opcion == 3:
-            export_csv_retrasos(prestamos, fecha_actual)
-            export_excel_retrasos(prestamos, fecha_actual)
-        elif exportar_opcion == 4:
-            return False
-        else:
-            print("Elige una opción válida (1, 2, 3 o 4).")
-            if cancelar():
-                return False
-    else:
-        print("No existen préstamos")
-        
-def export_csv_retrasos(prestamos, clientes):
-    fecha_actual = datetime.now().date()
-    with open("retrasos.csv", "w", encoding="latin1", newline="") as archivo_csv:
-        grabador = csv.writer(archivo_csv)
-        grabador.writerow(("Folio", "Nombre del Cliente", "Fecha Préstamo", "Fecha Retorno", "Días de Retraso"))
-        
-        for folio, datos in prestamos.items():
-            fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date()
-            if fecha_actual > fecha_retorno:
-                cliente_clave = int(datos['Clave_cliente'])
-                cliente = clientes.get(cliente_clave)
-                if cliente:
-                    nombre, apellido = cliente[1], cliente[0]
-                    dias_retraso = (fecha_actual - fecha_retorno).days
-                    grabador.writerow((folio, nombre + ' ' + apellido, datos['Fecha_prestamo'], datos['Fecha_retorno'], dias_retraso))
-    print("Datos exportados con éxito en retrasos.csv")
+            else:
+                print("\nNo hay préstamos con retraso.")
 
-def export_excel_retrasos(prestamos, clientes, retrasos_excel="retrasos.xlsx"):
-    fecha_actual = datetime.now().date()
-    libro = openpyxl.Workbook()
-    hoja = libro.active
-    hoja.title = "Retrasos"
+    except sqlite3.Error as e:
+        print(f"Error en la base de datos: {e}")
+    except ValueError:
+        print("Formato de fecha incorrecto. Por favor, utiliza el formato mm/dd/aaaa.")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+    finally:
+        print("Se ha cerrado la conexión")
 
-    hoja["A1"].value = "Folio"
-    hoja["B1"].value = "Nombre del Cliente"
-    hoja["C1"].value = "Fecha Préstamo"
-    hoja["D1"].value = "Fecha Retorno"
-    hoja["E1"].value = "Días de Retraso"
-    
-    hoja["A1"].font = Font(bold=True)
-    hoja["B1"].font = Font(bold=True)
-    hoja["C1"].font = Font(bold=True)
-    hoja["D1"].font = Font(bold=True)
-    hoja["E1"].font = Font(bold=True)
 
-    i = 2
-    for folio, datos in prestamos.items():
-        fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date()
-        if fecha_actual > fecha_retorno:
-            cliente_clave = int(datos['Clave_cliente'])
-            cliente = clientes.get(cliente_clave)
-            if cliente:
-                nombre, apellido = cliente[1], cliente[0]
-                dias_retraso = (fecha_actual - fecha_retorno).days
-                hoja.cell(row=i, column=1).value = folio
-                hoja.cell(row=i, column=2).value = nombre + ' ' + apellido
-                hoja.cell(row=i, column=3).value = datos['Fecha_prestamo']
-                hoja.cell(row=i, column=4).value = datos['Fecha_retorno']
-                hoja.cell(row=i, column=5).value = dias_retraso
-                i += 1
 
-    ajustar_ancho_columnas(hoja)
-    libro.save(retrasos_excel)
-    print(f"Datos exportados con éxito en {retrasos_excel}")
 
-## SUBMENU ANÁLISIS COMPLETO
-def analisis_completo():
-    print('lolol')
-
-## SUBMENU ANÁLISIS POR RODADA
-def analisis_rodada():
-    print('lolol')
-
-## SUBMENU ANÁLISIS POR COLOR
-def analisis_color():
-    print('lolol')
-
-## SUBMENU REPORTES PRÉSTAMOS POR RETORNAR
+#EV3
 def reporte_prestamos_por_retornar():
-    # Conectar a la base de datos SQLite
-    conexion = sqlite3.connect('RentaBicicletas.db')
-    cursor = conexion.cursor()
+    mostrar_ruta()
+    try:
+        # Solicitar fechas de inicio y fin del período
+        fecha_inicio = input("Ingrese la fecha de inicio del período (mm/dd/aaaa): ")
+        fecha_fin = input("Ingrese la fecha de fin del período (mm/dd/aaaa): ")
 
-    # Preguntar por las fechas de inicio y final para el filtro de préstamos
-    while True:
-        try:
-            fecha_inicial = input("\nIngresa la fecha inicial (MM/DD/AAAA): ")
-            fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
-            break
-        except ValueError:
-            print("Formato de fecha incorrecto, intenta de nuevo.")
-            if cancelar():
-                return
+        # Convertir las fechas a formato datetime
+        fecha_inicio = datetime.strptime(fecha_inicio, "%m/%d/%Y").date()
+        fecha_fin = datetime.strptime(fecha_fin, "%m/%d/%Y").date()
 
-    while True:
-        try:
-            fecha_final = input("Ingresa la fecha final (MM/DD/AAAA): ")
-            fecha_final = datetime.strptime(fecha_final, "%m/%d/%Y").date()
-            if fecha_final >= fecha_inicial:
-                break
-            else:
-                print("La fecha final debe ser posterior o igual a la fecha inicial.")
-                if cancelar():
-                    return
-        except ValueError:
-            print("Formato de fecha incorrecto, intenta de nuevo.")
-            if cancelar():
-                return
+        with sqlite3.connect("RentaBicicletas.db", 
+                             detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as conn:
+            mi_cursor = conn.cursor()
+            
+            # Consulta SQL para obtener préstamos pendientes de retorno en el período
+            mi_cursor.execute("""
+                SELECT 
+                    PRESTAMO.Clave_Unidad, 
+                    UNIDAD.Rodada, 
+                    PRESTAMO.Fecha_Prestamo, 
+                    CLIENTES.Nombres || ' ' || CLIENTES.Apellidos AS Nombre_Completo, 
+                    CLIENTES.Telefono
+                FROM 
+                    PRESTAMO
+                JOIN 
+                    CLIENTES ON PRESTAMO.Clave_Cliente = CLIENTES.Clave
+                JOIN 
+                    UNIDAD ON PRESTAMO.Clave_Unidad = UNIDAD.Clave
+                WHERE 
+                    PRESTAMO.Retorno = False
+                    AND DATE(PRESTAMO.Fecha_Prestamo) BETWEEN ? AND ?
+            """, (fecha_inicio, fecha_fin))
 
-    # Consulta SQL para obtener los préstamos que no han sido retornados en el rango de fechas
-    query = '''
-        SELECT folio, clave_cliente, clave_unidad, fecha_prestamo, fecha_retorno
-        FROM prestamos
-        WHERE retorno = 0
-        AND fecha_retorno BETWEEN ? AND ?
-    '''
-    cursor.execute(query, (fecha_inicial, fecha_final))
-    prestamos_por_retornar = cursor.fetchall()
+            registros = mi_cursor.fetchall()
 
-    if prestamos_por_retornar:
-        # Mostrar el reporte tabular con la librería 'tabulate'
-        headers = ["Folio", "Clave del Cliente", "Clave de la Unidad", "Fecha Préstamo", "Fecha Retorno"]
-        print(tabulate(prestamos_por_retornar, headers, tablefmt="rounded_outline"))
+            # Formatear los resultados
+            if registros:
+                registros_formateados = []
+                for clave_unidad, rodada, fecha_prestamo, nombre_completo, telefono in registros:
+                    if isinstance(fecha_prestamo, str):
+                        fecha_prestamo = datetime.strptime(fecha_prestamo, "%Y-%m-%d")
+                    fecha_prestamo_formateada = fecha_prestamo.strftime("%m/%d/%Y")
+                    registros_formateados.append(
+                        [clave_unidad, rodada, fecha_prestamo_formateada, nombre_completo, telefono]
+                    )
 
-        # Opción de exportar
-        while True:
-            try:
-                export_opcion = int(input("\nElige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n4. No deseo exportarlo\n"))
-                if export_opcion == 1:
-                    export_csv_prestamos_retornar(fecha_inicial, fecha_final)
-                    break
-                elif export_opcion == 2:
-                    export_excel_prestamos_retornar(fecha_inicial, fecha_final)
-                    break
-                elif export_opcion == 3:
-                    export_csv_prestamos_retornar(fecha_inicial, fecha_final)
-                    export_excel_prestamos_retornar(fecha_inicial, fecha_final)
-                    break
-                elif export_opcion == 4:
-                    break
+                headers = ["Clave de Unidad", "Rodada", "Fecha de Préstamo", "Nombre Completo", "Teléfono"]
+                print("\n--- Reporte de Préstamos por Retornar ---")
+                print(tabulate(registros_formateados, headers=headers, tablefmt="rounded_outline"))
+
+                # Preguntar si se desea exportar
+                export_option = input("\n¿Desea exportar el reporte? (1: CSV, 2: Excel, 3: Ambas, 4: No exportar): ")
+                
+                # Crear DataFrame para exportar
+                df = pd.DataFrame(registros_formateados, columns=headers)
+                
+                # Exportar según la elección
+                if export_option == "1":
+                    df.to_csv("reporte_prestamos_por_retornar.csv", index=False)
+                    print("Reporte exportado a 'reporte_prestamos_por_retornar.csv'.")
+                elif export_option == "2":
+                    df.to_excel("reporte_prestamos_por_retornar.xlsx", index=False, engine="openpyxl")
+                    # Ajustar ancho de columnas en Excel
+                    with pd.ExcelWriter("reporte_prestamos_por_retornar.xlsx", engine="openpyxl", mode="a") as writer:
+                        wb = writer.book
+                        ws = wb.active
+                        for column in ws.columns:
+                            max_length = max(len(str(cell.value)) for cell in column if cell.value) + 2
+                            ws.column_dimensions[column[0].column_letter].width = max_length
+                    print("Reporte exportado a 'reporte_prestamos_por_retornar.xlsx'.")
+                elif export_option == "3":
+                    df.to_csv("reporte_prestamos_por_retornar.csv", index=False)
+                    df.to_excel("reporte_prestamos_por_retornar.xlsx", index=False, engine="openpyxl")
+                    # Ajustar ancho de columnas en Excel
+                    with pd.ExcelWriter("reporte_prestamos_por_retornar.xlsx", engine="openpyxl", mode="a") as writer:
+                        wb = writer.book
+                        ws = wb.active
+                        for column in ws.columns:
+                            max_length = max(len(str(cell.value)) for cell in column if cell.value) + 2
+                            ws.column_dimensions[column[0].column_letter].width = max_length
+                    print("Reporte exportado a 'reporte_prestamos_por_retornar.csv' y 'reporte_prestamos_por_retornar.xlsx'.")
+                elif export_option == "4":
+                    print("No se exportó el reporte.")
                 else:
-                    print("Elige una opción válida (1, 2, 3 o 4).")
-            except ValueError:
-                print("Error: Debes ingresar un número entero que sea válido.")
-                if cancelar():
-                    return
-            except Exception as name_error:
-                print(f"Ha ocurrido un error inesperado: {name_error}")
-                if cancelar():
-                    return
-    else:
-        print("No se encontró ningún préstamo que coincida con los criterios.")
+                    print("Opción no válida. No se exportó el reporte.")
 
-    # Cerrar la conexión con la base de datos
-    conexion.close()
-
-## Exporta los préstamos por retornar en formato excel
-def export_excel_prestamos_retornar(fecha_prestamo, fecha_de_retorno, name_excel="Prestamos_por_retornar.xlsx"):
-    # Conectar a la base de datos
-    conexion = sqlite3.connect('RentaBicicletas.db')
-    cursor = conexion.cursor()
-
-    # Consulta SQL para obtener los préstamos no retornados en el rango de fechas
-    query = '''
-        SELECT folio, clave_unidad, clave_cliente, fecha_prestamo, fecha_retorno
-        FROM prestamos
-        WHERE retorno = 0
-        AND fecha_retorno BETWEEN ? AND ?
-    '''
-    cursor.execute(query, (fecha_prestamo, fecha_de_retorno))
-    prestamos = cursor.fetchall()
-
-    # Crear un nuevo archivo de Excel
-    libro = openpyxl.Workbook()
-    hoja = libro.active
-    hoja.title = "Préstamos"
-
-    # Encabezados
-    hoja["A1"].value = "Folio"
-    hoja["B1"].value = "Clave de la unidad"
-    hoja["C1"].value = "Clave del cliente"
-    hoja["D1"].value = "Fecha préstamo"
-    hoja["E1"].value = "Fecha de retorno"
-
-    # Negritas para los encabezados
-    for col in ["A1", "B1", "C1", "D1", "E1"]:
-        hoja[col].font = Font(bold=True)
-
-    # Insertar los datos obtenidos de la base de datos
-    for i, prestamo in enumerate(prestamos, start=2):
-        hoja.cell(row=i, column=1).value = prestamo[0]  # Folio
-        hoja.cell(row=i, column=2).value = prestamo[1]  # Clave de la unidad
-        hoja.cell(row=i, column=3).value = prestamo[2]  # Clave del cliente
-        hoja.cell(row=i, column=4).value = prestamo[3]  # Fecha préstamo
-        hoja.cell(row=i, column=5).value = prestamo[4]  # Fecha de retorno
-
-    # Ajustar ancho de columnas (opcional)
-    ajustar_ancho_columnas(hoja)
-
-    # Guardar el archivo Excel
-    libro.save(name_excel)
-    print(f"Datos exportados con éxito en {name_excel}")
-
-    # Cerrar la conexión a la base de datos
-    conexion.close()
-
-## Exporta los préstamos por retornar en formato csv
-def export_csv_prestamos_retornar(fecha_prestamo, fecha_de_retorno, nombre_csv="Prestamos_por_retornar.csv"):
-    # Conectar a la base de datos
-    conexion = sqlite3.connect('RentaBicicletas.db')
-    cursor = conexion.cursor()
-
-    # Consulta SQL para obtener los préstamos no retornados en el rango de fechas
-    query = '''
-        SELECT folio, clave_unidad, clave_cliente, fecha_prestamo, fecha_retorno
-        FROM prestamos
-        WHERE retorno = 0
-        AND fecha_retorno BETWEEN ? AND ?
-    '''
-    cursor.execute(query, (fecha_prestamo, fecha_de_retorno))
-    prestamos = cursor.fetchall()
-
-    # Abrir archivo CSV y escribir los datos
-    with open(nombre_csv, "w", encoding="latin1", newline="") as archivo_csv:
-        grabador = csv.writer(archivo_csv)
-
-        # Encabezados
-        grabador.writerow(("Folio", "Clave de la unidad", "Clave del cliente", "Fecha préstamo", "Fecha de retorno"))
-
-        # Verificar si hay préstamos para exportar
-        if prestamos:
-            grabador.writerows(prestamos)
-            print(f"Datos exportados con éxito en {nombre_csv}")
-        else:
-            print("No hay préstamos que coincidan con los criterios especificados.")
-
-    # Cerrar la conexión a la base de datos
-    conexion.close()
-
-## SUBMENU PRÉSTAMOS POR PERIODO
-def prestamos_por_periodo(prestamos):
-    if prestamos:
-            while True:
-                mostrar_ruta()
-                try:
-                    fecha_inicial = input("\nIngresa la fecha inicial del periodo (MM/DD/AAAA): ")
-                    fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
-                    break
-                except ValueError:
-                    print("Formato de fecha incorrecto, intenta de nuevo.")
-                    if cancelar():
-                        break
-
-            while True:
-                try:
-                    fecha_final = input("Ingresa la fecha final del periodo (MM/DD/AAAA): ")
-                    fecha_final = datetime.strptime(fecha_final, "%m/%d/%Y").date()
-                    if fecha_final >= fecha_inicial:
-                        break
-                    else:
-                        print("La fecha final debe ser posterior o igual a la fecha inicial.")
-                        if cancelar():
-                            break
-                except ValueError:
-                    print("Formato de fecha incorrecto, intenta de nuevo.")
-                    if cancelar():
-                        break
-
-            print(f"{'Folio':^8}{'Clave del Cliente': <20}{'Clave de la Unidad': <20}{'Fecha Préstamo': <20}{'Fecha Retorno'}")
-            print("=" * 80)
-
-            for folio, datos in prestamos.items():
-                fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
-                if fecha_inicial <= fecha_prestamo <= fecha_final:
-                    print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
-
-            print("=" * 80)
-
-            export_opcion = int(input("Elige una opción de exportación: \n1. CSV\n2. Excel\n3. Ambos\n"))
-            if export_opcion == 1:
-                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            elif export_opcion == 2:
-                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            elif export_opcion == 3:
-                export_csv_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-                export_excel_prestamos_por_periodo(prestamos, fecha_inicial, fecha_final)
-            elif export_opcion == 4:
-                return False
             else:
-                print("Elige una opción válida (1, 2, 3 o 4).")
-                if cancelar():
-                    return False
-    else: 
-        print("No hay préstamos para realizar un reporte")
+                print("\nNo hay préstamos pendientes de retorno en el período indicado.")
 
-## Exporta los préstamos por periodo en formato excel
-def export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno, name_excel="Prestamos_por_periodo.xlsx"):
-    libro = openpyxl.Workbook()
-    hoja = libro.active
-    hoja.title = "préstamos"
+    except sqlite3.Error as e:
+        print(f"Error en la base de datos: {e}")
+    except ValueError:
+        print("Formato de fecha incorrecto. Por favor, utiliza el formato mm/dd/aaaa.")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+    finally:
+        print("Se ha cerrado la conexión")
 
-    hoja["A1"].value = "Folio"
-    hoja["B1"].value = "Clave de la unidad"
-    hoja["C1"].value = "Clave del cliente"
-    hoja["D1"].value = "Fecha préstamo"
-    hoja["E1"].value = "Fecha de retorno"
-    
-    hoja["A1"].font = Font(bold=True)
-    hoja["B1"].font = Font(bold=True)
-    hoja["C1"].font = Font(bold=True)
-    hoja["D1"].font = Font(bold=True)
-    hoja["E1"].font = Font(bold=True)
 
-    # Poner negrita en los encabezados (fila 1)
-    hoja["A1"].font = Font(bold=True)
-    hoja["B1"].font = Font(bold=True)
-    hoja["C1"].font = Font(bold=True)
-    hoja["D1"].font = Font(bold=True)
-    hoja["E1"].font = Font(bold=True)
 
-    i = 2  # Iniciar en la fila 2 porque la fila 1 son los encabezados
-    for folio, datos in prestamos.items():
-        fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
-        if fecha_prestamo <= fecha_prestamo <= fecha_de_retorno:
-            # Asignar los valores a las celdas
-            hoja.cell(row=i, column=1).value = folio
-            hoja.cell(row=i, column=2).value = datos["Clave_unidad"]
-            hoja.cell(row=i, column=3).value = datos["Clave_cliente"]
-            hoja.cell(row=i, column=4).value = datos["Fecha_prestamo"]
-            hoja.cell(row=i, column=5).value = datos["Fecha_retorno"]
+#EV3
+def reporte_prestamos_por_periodo():
+    mostrar_ruta()
+    try:
+        # Solicitar fechas de inicio y fin del período
+        fecha_inicio = input("Ingrese la fecha de inicio del período (mm/dd/aaaa): ")
+        fecha_fin = input("Ingrese la fecha de fin del período (mm/dd/aaaa): ")
 
-            # Calcular el ancho según la longitud del contenido de cada fila
-            hoja.column_dimensions["A"].width = max(hoja.column_dimensions["A"].width or 0, len(str(folio)))
-            hoja.column_dimensions["B"].width = max(hoja.column_dimensions["B"].width or 0, len(str(datos["Clave_unidad"])))
-            hoja.column_dimensions["C"].width = max(hoja.column_dimensions["C"].width or 0, len(str(datos["Clave_cliente"])))
-            hoja.column_dimensions["D"].width = max(hoja.column_dimensions["D"].width or 0, len(str(datos["Fecha_prestamo"])))
-            hoja.column_dimensions["E"].width = max(hoja.column_dimensions["E"].width or 0, len(str(datos["Fecha_retorno"])))
+        # Convertir las fechas a formato datetime
+        fecha_inicio = datetime.strptime(fecha_inicio, "%m/%d/%Y").date()
+        fecha_fin = datetime.strptime(fecha_fin, "%m/%d/%Y").date()
 
-            i += 1  # Incrementa la fila
-    ajustar_ancho_columnas(hoja)
-    # Guarda el archivo Excel
-    libro.save(name_excel)
-    
-    print(f"Datos exportados con éxito en {name_excel}")
+        with sqlite3.connect("RentaBicicletas.db", 
+                             detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as conn:
+            mi_cursor = conn.cursor()
+            
+            # Consulta SQL para obtener préstamos realizados en el período
+            mi_cursor.execute("""
+                SELECT 
+                    PRESTAMO.Clave_Unidad, 
+                    UNIDAD.Rodada, 
+                    PRESTAMO.Fecha_Prestamo, 
+                    CLIENTES.Nombres || ' ' || CLIENTES.Apellidos AS Nombre_Completo, 
+                    CLIENTES.Telefono
+                FROM 
+                    PRESTAMO
+                JOIN 
+                    CLIENTES ON PRESTAMO.Clave_Cliente = CLIENTES.Clave
+                JOIN 
+                    UNIDAD ON PRESTAMO.Clave_Unidad = UNIDAD.Clave
+                WHERE 
+                    DATE(PRESTAMO.Fecha_Prestamo) BETWEEN ? AND ?
+            """, (fecha_inicio, fecha_fin))
 
-## Exporta los préstamos por periodo en formato csv
-def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno, nombre_csv="Prestamos_por_periodo.csv"):
-    with open(nombre_csv, "w", encoding="latin1", newline="") as archivo_csv:
-        grabador = csv.writer(archivo_csv)
-        grabador.writerow(("Folio", "Clave de la unidad", "Clave del cliente", "Fecha préstamo", "Fecha de retorno"))
+            registros = mi_cursor.fetchall()
 
-        prestamos_filtrados = [
-            (folio, datos["Clave_unidad"], datos["Clave_cliente"], datos["Fecha_prestamo"], datos["Fecha_retorno"])
-            for folio, datos in prestamos.items()
-            if fecha_prestamo <= datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date() <= fecha_de_retorno
-        ]
+            # Mostrar resultados en forma tabular
+            if registros:
+                registros_formateados = []
+                for clave_unidad, rodada, fecha_prestamo, nombre_completo, telefono in registros:
+                    if isinstance(fecha_prestamo, str):
+                        fecha_prestamo = datetime.strptime(fecha_prestamo, "%Y-%m-%d")
+                    fecha_prestamo_formateada = fecha_prestamo.strftime("%m/%d/%Y")
+                    registros_formateados.append(
+                        [clave_unidad, rodada, fecha_prestamo_formateada, nombre_completo, telefono]
+                    )
 
-        if prestamos_filtrados:
-            grabador.writerows(prestamos_filtrados)
-            print(f"Datos exportados con éxito en {nombre_csv}")
-        else:
-            print("No hay préstamos que coincidan con los criterios especificados.")
-            if cancelar():
-                return False
+                headers = ["Clave de Unidad", "Rodada", "Fecha de Préstamo", "Nombre Completo", "Teléfono"]
+                print("\n--- Reporte de Préstamos por Período ---")
+                print(tabulate(registros_formateados, headers=headers, tablefmt="rounded_outline"))
 
+                # Preguntar si se desea exportar
+                export_option = input("\n¿Desea exportar el reporte? (1: CSV, 2: Excel, 3: Ambas, 4: No exportar): ")
+                
+                # Crear DataFrame para exportar
+                df = pd.DataFrame(registros_formateados, columns=headers)
+                
+                # Exportar según la elección
+                if export_option == "1":
+                    df.to_csv("prestamos_por_periodo.csv", index=False)
+                    print("Reporte exportado a 'prestamos_por_periodo.csv'.")
+                elif export_option == "2":
+                    df.to_excel("prestamos_por_periodo.xlsx", index=False, engine="openpyxl")
+                    # Ajustar columnas en el archivo Excel
+                    with pd.ExcelWriter("prestamos_por_periodo.xlsx", engine="openpyxl", mode="a") as writer:
+                        wb = writer.book
+                        ws = wb.active
+                        for column in ws.columns:
+                            max_length = max(len(str(cell.value)) for cell in column if cell.value) + 2
+                            ws.column_dimensions[column[0].column_letter].width = max_length
+                    print("Reporte exportado a 'prestamos_por_periodo.xlsx'.")
+                elif export_option == "3":
+                    df.to_csv("prestamos_por_periodo.csv", index=False)
+                    df.to_excel("prestamos_por_periodo.xlsx", index=False, engine="openpyxl")
+                    # Ajustar columnas en el archivo Excel
+                    with pd.ExcelWriter("prestamos_por_periodo.xlsx", engine="openpyxl", mode="a") as writer:
+                        wb = writer.book
+                        ws = wb.active
+                        for column in ws.columns:
+                            max_length = max(len(str(cell.value)) for cell in column if cell.value) + 2
+                            ws.column_dimensions[column[0].column_letter].width = max_length
+                    print("Reporte exportado a 'prestamos_por_periodo.csv' y 'prestamos_por_periodo.xlsx'.")
+                elif export_option == "4":
+                    print("No se exportó el reporte.")
+                else:
+                    print("Opción no válida. No se exportó el reporte.")
+
+            else:
+                print("\nNo hay préstamos en el período indicado.")
+
+    except sqlite3.Error as e:
+        print(f"Error en la base de datos: {e}")
+    except ValueError:
+        print("Formato de fecha incorrecto. Por favor, utiliza el formato mm/dd/aaaa.")
+    except Exception as e:
+        print(f"Se produjo el siguiente error: {e}")
+    finally:
+        print("Se ha cerrado la conexión")
+
+
+
+#EV3
 ##Submenú analísis
 def submenu_analisis():
+    mostrar_ruta()
     while True:
-        mostrar_ruta()
         print("\n--- SUBMENÚ ANÁLISIS ---")
         print("1. Duración de los préstamos.")
         print("2. Ranking de clientes.")
@@ -1608,9 +1637,13 @@ def submenu_analisis():
             opcion = int(opcion)
 
             if opcion == 1:
+                ruta.append('Duración de los préstamos')
                 estadisticas_prestamos()
+                ruta.pop()
             elif opcion == 2:
+                ruta.append('Ranking de clientes')
                 ranking_clientes()
+                ruta.pop()
             elif opcion == 3:
                 ruta.append('Preferencias de Rentas')
                 preferencias_rentas()
@@ -1618,13 +1651,14 @@ def submenu_analisis():
             elif opcion == 4:
                 return False
             else:
-                print("Opción invalida, intentalo de nuevo.")
+                print("Opción inválida, inténtalo de nuevo.")
         except ValueError:
-            print('Favor de ingresar un valor numerico')
+            print('Favor de ingresar un valor numérico')
 
 #EV3
 #Datos estadisitcos de la duracion de los prestamos
 def estadisticas_prestamos():
+    mostrar_ruta()
     try:
         with sqlite3.connect('RentaBicicletas.db') as conn:
             query = "SELECT Dias_Prestamo FROM PRESTAMO"
@@ -1655,67 +1689,12 @@ def estadisticas_prestamos():
 
 
 
-## SUBMENÚ DURACIÓN DE LOS PRÉSTAMOS
-def duracion_prestamos(prestamos):
-    dias_prestamo = [prestamo['Cantidad_dias'] for prestamo in prestamos.values()]
 
-    if len(dias_prestamo) == 0:
-        print("No hay registros de préstamos para calcular estadísticas.")
-        return
-
-    df = pd.DataFrame(dias_prestamo, columns=['Días de préstamo'])
-
-    media = df['Días de préstamo'].mean()
-    mediana = df['Días de préstamo'].median()
-    moda = df['Días de préstamo'].mode().tolist()  # Convertir a lista en caso de múltiples modas
-    minimo = df['Días de préstamo'].min()
-    maximo = df['Días de préstamo'].max()
-    desviacion_estandar = df['Días de préstamo'].std()
-    cuartiles = np.percentile(df['Días de préstamo'], [25, 50, 75])
-
-    reporte = {
-        "Media": media,
-        "Mediana": mediana,
-        "Moda": moda,
-        "Mínimo": minimo,
-        "Máximo": maximo,
-        "Desviación estándar": desviacion_estandar,
-        "Cuartiles (25%, 50%, 75%)": cuartiles
-    }
-
-    for clave, valor in reporte.items():
-        print(f"{clave}: {valor}")
-
-
-#cargar rentas
-def cargar_rentas_csv():
-    rentas = {}
-    try:
-        with open('rentas.csv', mode='r') as file:
-            reader = csv.reader(file)
-            next(reader)  # Saltar la fila de encabezados
-            for row in reader:
-                clave_cliente = int(row[0])
-                cantidad_rentas = int(row[1])
-                rentas[clave_cliente] = cantidad_rentas
-        print("Rentas cargadas correctamente.")
-    except FileNotFoundError:
-        print("Archivo de rentas no encontrado. Se inicializará una lista vacía.")
-    except Exception as e:
-        print(f"Error al cargar rentas: {e}")
-    return rentas
-    
-#guardar rentas
-def guardar_rentas_csv(rentas):
-    try:
-        df = pd.DataFrame(list(rentas.items()), columns=['Clave_cliente', 'Cantidad_rentas'])
-        df.to_csv('rentas.csv', index=False)
-    except Exception as e:
-        print(f"Ocurrió un error al guardar las rentas: {e}")
-    
+ 
 #EV3
 #Ranking de clientes, cantidad de prestamos(rentas) que realizo cada cliente.
 def ranking_clientes():
+    mostrar_ruta()
     try:
         with sqlite3.connect('RentaBicicletas.db') as conn:
             cursor = conn.cursor()
@@ -1745,50 +1724,11 @@ def ranking_clientes():
 
 
 
-## SUBMENÚ RANKING CLIENTES
-# Función para generar el ranking de clientes
-def ranking_clientes_old(prestamos, clientes, rentas):
-    ranking_data = {
-        'Cantidad_rentas': [],
-        'Clave_cliente': [],
-        'Nombre_completo': [],
-        'Teléfono': []
-    }
-
-    # Contar las rentas acumuladas por cada cliente
-    for clave_cliente, cantidad_rentas in rentas.items():
-        if clave_cliente in clientes:
-            cliente = clientes[clave_cliente]
-            apellidos, nombre, telefono = cliente  # Desempaquetar la tupla
-
-            ranking_data['Cantidad_rentas'].append(cantidad_rentas)
-            ranking_data['Clave_cliente'].append(clave_cliente)
-            ranking_data['Nombre_completo'].append(f"{nombre} {apellidos}")
-            ranking_data['Teléfono'].append(telefono)
-
-    # df para ordenar los resultados
-    df_ranking = pd.DataFrame(ranking_data)
-    df_ranking.sort_values(by='Cantidad_rentas', ascending=False, inplace=True)
-
-    # ranking con formato de tabla
-    print("\n--- RANKING DE CLIENTES ---")
-    print(f"{'Posición':<10} {'Clave Cliente':<15} {'Nombre Completo':<30} {'Teléfono':<15} {'Cantidad de Rentas':<20}")
-    print("=" * 90)
-    for i, row in enumerate(df_ranking.itertuples(index=False), 1):
-        print(f"{i:<10} {row.Clave_cliente:<15} {row.Nombre_completo:<30} {row.Teléfono:<15} {row.Cantidad_rentas:<20}")
-    
-    guardar_rentas_csv(rentas)
-    guardar_ranking_csv(df_ranking)
-
-
-def guardar_ranking_csv(df_ranking):
-    df_ranking.to_csv("Ranking_clientes.csv", index=False, encoding="latin1")
-    print("Ranking de clientes exportado exitosamente en 'Ranking_clientes.csv'.")
 
 
 
+#EV3
 ## SUBMENÚ PREFERENCIAS RENTAS
-#checar si debe de volver a preguntar despues de dar un reporte o debe de salir directo al submenu de analisis
 def preferencias_rentas():
     mostrar_ruta()
     print("Elige el reporte que deseas generar:")
@@ -1798,178 +1738,44 @@ def preferencias_rentas():
     print("4. Volver al submenu")
     
     while True:
-        opcion_pref = input("Ingresa una de las opciónes mencionadas: ")
+        opcion_pref = input("Ingresa una de las opciones mencionadas: ")
         if opcion_pref.isdigit():
             opcion_pref = int(opcion_pref)
             if opcion_pref == 1:
+                ruta.append('Por rodada')
                 rodada_tab_count()
-                break
+                ruta.pop()
             elif opcion_pref == 2:
+                ruta.append('Por color')
                 colores_tab_count()
-                break
+                ruta.pop()
             elif opcion_pref == 3:
+                ruta.append('Por día de la semana')
                 prestamos_por_dia_semana()
-                break
+                ruta.pop()
             elif opcion_pref == 4:
-                break
+                break  # Salir del menú si se elige la opción 4
             else:
-                print("Opción inválida. Debes ingresar 1 o 2.")
+                print("Opción inválida. Debes ingresar un número del 1 al 4.")
         else:
-            print("Entrada inválida. Por favor ingresa un número (1 o 2).")
-
-def reporte_prestamos_por_rodada(conteo_rodadas):
-    # Ordenar las rodadas por la cantidad de préstamos en orden descendente
-    datos_ordenados = sorted(conteo_rodadas.items(), key=lambda x: x[1], reverse=True)
-
-    # Imprimir el reporte en formato tabular
-    print("\n--- REPORTE DE PRÉSTAMOS POR RODADA ---")
-    print("{:<10} {:<20}".format("Rodada", "Cantidad de Préstamos"))
-    print("-" * 30)
-    for rodada, cantidad in datos_ordenados:
-        print("{:<10} {:<20}".format(rodada, cantidad))
-    exportar_conteo_rodada_excel(conteo_rodadas)
-
-
-
-
-def export_conteo_rodada(conteo_rodadas, nombre_archivo="Conteo_Rodadas.csv"):
-    # Exportar el conteo de rodadas a un archivo CSV
-    with open(nombre_archivo, "w", encoding="latin1", newline="") as archivo_csv:
-        grabador = csv.writer(archivo_csv)
-        grabador.writerow(("Rodada", "Cantidad de Préstamos"))
-        for rodada, cantidad in conteo_rodadas.items():
-            grabador.writerow((rodada, cantidad))
-    print(f"Conteo de rodadas exportado exitosamente en '{nombre_archivo}'")
-
-
-def cargar_conteo_rodadas(nombre_archivo="Conteo_Rodadas.csv"):
-    conteo_rodadas = {}
-    try:
-        # Abrir el archivo CSV para leer el conteo de rodadas
-        with open(nombre_archivo, "r", encoding="latin1", newline="") as archivo_csv:
-            lector = csv.reader(archivo_csv)
-            # Saltar la fila de encabezado
-            next(lector)
-            # Leer cada fila y actualizar el diccionario conteo_rodadas
-            for fila in lector:
-                if len(fila) == 2:  # Asegurar que la fila tiene exactamente 2 columnas
-                    rodada, cantidad = fila
-                    conteo_rodadas[int(rodada)] = int(cantidad)
-    except FileNotFoundError:
-        print(f"El archivo '{nombre_archivo}' no existe. Asegúrate de que el archivo se haya exportado previamente.")
-    
-    return conteo_rodadas
-    
-
-def exportar_conteo_rodada_excel(conteo_rodadas, nombre_archivo="Conteo_Rodadas.xlsx"):
-    # Convertir el conteo de rodadas a un DataFrame de pandas
-    df = pd.DataFrame(list(conteo_rodadas.items()), columns=["Rodada", "Cantidad de Préstamos"])
-    
-    # Exportar a un archivo de Excel
-    df.to_excel(nombre_archivo, index=False)
-    print(f"Conteo de rodadas exportado exitosamente en '{nombre_archivo}'")
-
-
-# 1. Función para exportar los colores a un archivo CSV
-def exportar_colores_csv(unidades, nombre_archivo="Colores.csv"):
-    conteo_colores = {}
-    for clave, (rodada, color) in unidades.items():
-        if color in conteo_colores:
-            conteo_colores[color] += 1
-        else:
-            conteo_colores[color] = 1
-    
-    try:
-        with open(nombre_archivo, mode='w', newline='', encoding='latin1') as archivo_csv:
-            escritor = csv.writer(archivo_csv)
-            escritor.writerow(["Color", "Cantidad"])  # Encabezados
-            for color, cantidad in conteo_colores.items():
-                escritor.writerow([color, cantidad])
-        print(f"Colores exportados exitosamente a {nombre_archivo}.")
-    except Exception as e:
-        print(f"Error al exportar colores: {e}")
-
-# 2. Función para cargar los colores desde un archivo CSV
-def cargar_colores_csv(nombre_archivo="Colores.csv"):
-    unidades = {}
-    try:
-        with open(nombre_archivo, mode='r', newline='', encoding='latin1') as archivo_csv:
-            lector = csv.reader(archivo_csv)
-            next(lector)  # Saltar encabezado
-            for fila in lector:
-                if len(fila) == 2:
-                    color, cantidad = fila
-                    unidades[color] = int(cantidad)
-        print(f"Colores cargados exitosamente desde {nombre_archivo}.")
-    except FileNotFoundError:
-        print(f"El archivo '{nombre_archivo}' no existe.")
-    except Exception as e:
-        print(f"Error al cargar colores: {e}")
-    return unidades
-
-# 3. Función para generar un reporte tabular de los colores
-def reporte_colores_tabular_ordenado(unidades):
-    conteo_colores = {}
-    for clave, (rodada, color) in unidades.items():
-        if color in conteo_colores:
-            conteo_colores[color] += 1
-        else:
-            conteo_colores[color] = 1
-
-    # Ordenar los colores alfabéticamente
-    colores_ordenados = sorted(conteo_colores.items())
-
-    # Imprimir reporte en formato tabular
-    print("\n--- REPORTE DE COLORES (ORDENADO) ---")
-    print(f"{'Color':<15} {'Cantidad':<10}")
-    print("-" * 25)
-    for color, cantidad in colores_ordenados:
-        print(f"{color:<15} {cantidad:<10}")
-    exportar_colores_excel(unidades)
-    exportar_colores_csv(unidades)    
-  
-def exportar_colores_excel(unidades, nombre_archivo="Colores.xlsx"):
-    try:
-        conteo_colores = {}
-        for clave, (rodada, color) in unidades.items():
-            if color in conteo_colores:
-                conteo_colores[color] += 1
-            else:
-                conteo_colores[color] = 1
-
-        # Convertir los datos a un DataFrame de pandas
-        df = pd.DataFrame(list(conteo_colores.items()), columns=["Color", "Cantidad"])
+            print("Entrada inválida. Por favor ingresa un número del 1 al 4.")
         
-        # Exportar a un archivo de Excel
-        df.to_excel(nombre_archivo, index=False)
-        print(f"Colores exportados exitosamente a {nombre_archivo}.")
-    except Exception as e:
-        print(f"Error al exportar colores a Excel: {e}")
-   
-#EV3
-#Reporte tabular de preferencias del cliente, cantidad de prestamos por color
-#version sin grafica   
-def colores_tab_count1():
-    try:
-        with sqlite3.connect('RentaBicicletas.db') as conn:
-            cursor = conn.cursor()
-
-            cursor.execute("SELECT Color, COUNT(*) as Cantidad FROM UNIDAD GROUP BY Color ORDER BY Cantidad DESC")
-            colores = cursor.fetchall()
-
-            print("\n--- Reporte de Colores de Unidades ---")
-            headers_colores = ["Color", "Cantidad"]
-            print(tabulate(colores, headers=headers_colores, tablefmt="rounded_outline"))
+        # Mostrar el menú nuevamente después de cada opción seleccionada (excepto al salir)
+        if opcion_pref != 4:
+            mostrar_ruta()
+            print("\nElige el reporte que deseas generar:")
+            print("1. Cantidad de préstamos por rodada")
+            print("2. Cantidad de préstamos por color")
+            print("3. Por días de la semana")
+            print("4. Volver al submenú")
 
 
-    except sqlite3.Error as e:
-        print(f"Error de base de datos: {e}")
-    except Exception as e:
-        print(f"Se produjo el siguiente error: {e}")
+
 
 #Version final con grafica que corresponde a sus colores
 #Grafica de pastel, colores
 def colores_tab_count():
+    mostrar_ruta()
     try:
         with sqlite3.connect('RentaBicicletas.db') as conn:
             cursor = conn.cursor()
@@ -2011,28 +1817,41 @@ def colores_tab_count():
 
 
 #EV3
-#Reporte tabular de preferencias del cliente, cantidad de prestamos por rodada
+#Reporte tabular de preferencias del cliente, cantidad de prestamos por rodada y grafica de barras
 def rodada_tab_count():
     try:
         with sqlite3.connect('RentaBicicletas.db') as conn:
             cursor = conn.cursor()
 
+            # Consulta SQL para obtener la cantidad de unidades por rodada
             cursor.execute("SELECT Rodada, COUNT(*) as Cantidad FROM UNIDAD GROUP BY Rodada ORDER BY Cantidad DESC")
-            colores = cursor.fetchall()
+            rodadas = cursor.fetchall()
 
+            # Mostrar los datos en una tabla en la consola
             print("\n--- Reporte de Rodadas de Unidades ---")
-            headers_colores = ["Rodada", "Cantidad"]
-            print(tabulate(colores, headers=headers_colores, tablefmt="rounded_outline"))
+            headers_rodadas = ["Rodada", "Cantidad"]
+            print(tabulate(rodadas, headers=headers_rodadas, tablefmt="rounded_outline"))
+
+            # Convertir los resultados a un DataFrame para usar en la gráfica
+            df_rodadas = pd.DataFrame(rodadas, columns=headers_rodadas)
+
+            # Gráfica de pastel
+            plt.figure(figsize=(8, 6))
+            plt.pie(df_rodadas['Cantidad'], labels=df_rodadas['Rodada'], autopct='%1.1f%%', startangle=140)
+            plt.title('Cantidad de unidades por rodada y su proporción')
+            plt.axis('equal')  # Asegura que el gráfico sea circular
+            plt.show()
 
     except sqlite3.Error as e:
         print(f"Error de base de datos: {e}")
     except Exception as e:
-        print(f"Se produjo el siguiente error: {e}")
+        print(f"Se produjo el siguiente error: {e}")
 
 
 #EV3
 #Reporte tabular por dia de la semana y una grafica de barras
 def prestamos_por_dia_semana():
+    mostrar_ruta()
     try:
         with sqlite3.connect('RentaBicicletas.db') as conn:
             cursor = conn.cursor()
