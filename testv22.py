@@ -281,9 +281,9 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas, co
                         break
                     elif eleccion_de_fecha == 2:
                         while True:
-                            fecha_a_elegir = input("Indica la fecha del préstamo (MM/DD/AAAA): ")
+                            fecha_a_elegir = input("Indica la fecha del préstamo (MM-DD-AAAA): ")
                             try:
-                                fecha_prestamo = datetime.strptime(fecha_a_elegir, "%m/%d/%Y").date()
+                                fecha_prestamo = datetime.strptime(fecha_a_elegir, "%m-%d-%Y").date()
                                 if fecha_prestamo >= fecha_actual:
                                     break
                                 print("La fecha no puede ser anterior a la actual.")
@@ -299,7 +299,7 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas, co
                 if Cantidad_de_dias.isdigit() and int(Cantidad_de_dias) > 0:
                     Cantidad_de_dias = int(Cantidad_de_dias)
                     fecha_de_retorno = fecha_prestamo + timedelta(days=Cantidad_de_dias)
-                    print(f"La fecha en la que se debe regresar la unidad es el: {fecha_de_retorno.strftime('%m/%d/%Y')}")
+                    print(f"La fecha en la que se debe regresar la unidad es el: {fecha_de_retorno.strftime('%m-%d-%Y')}")
                     break
                 print("La cantidad de días debe ser un número mayor a 0.")
                 if cancelar(): return
@@ -308,8 +308,8 @@ def registrar_prestamo(clientes, unidades, prestamos, rentas, conteo_rodadas, co
             prestamos[folio] = {
                 'Clave_cliente': Clave_cliente,
                 'Clave_unidad': Clave_unidad,
-                'Fecha_prestamo': fecha_prestamo.strftime("%m/%d/%Y"),
-                'Fecha_retorno': fecha_de_retorno.strftime('%m/%d/%Y'),
+                'Fecha_prestamo': fecha_prestamo.strftime("%m-%d-%Y"),
+                'Fecha_retorno': fecha_de_retorno.strftime('%m-%d-%Y'),
                 'Cantidad_dias': Cantidad_de_dias,
                 'Retorno': False
             }
@@ -431,7 +431,7 @@ def menu_retorno():
                       if numdefolio in prestamos:
                           today = datetime.now().date()
                           prestamos[numdefolio]["Retorno"] = True  #v2
-                          print("Retornó su unidad exitosamente el día", today.strftime('%m/%d/%Y'), "\n")
+                          print("Retornó su unidad exitosamente el día", today.strftime('%m-%d-%Y'), "\n")
                           export_prestamos_auto(prestamos)
                           break
                       else:
@@ -732,8 +732,8 @@ def reporte_prestamos_por_retornar(prestamos):
         while True:
             mostrar_ruta()
             try:
-                fecha_inicial = input("\nIngresa la fecha inicial (MM/DD/AAAA): ")
-                fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
+                fecha_inicial = input("\nIngresa la fecha inicial (MM-DD-AAAA): ")
+                fecha_inicial = datetime.strptime(fecha_inicial, "%m-%d-%Y").date()
                 break
             except ValueError:
                 print("Formato de fecha incorrecto, intenta de nuevo.")
@@ -743,8 +743,8 @@ def reporte_prestamos_por_retornar(prestamos):
         
         while True:
             try:
-                fecha_final = input("Ingresa la fecha final (MM/DD/AAAA): ")
-                fecha_final = datetime.strptime(fecha_final, "%m/%d/%Y").date()
+                fecha_final = input("Ingresa la fecha final (MM-DD-AAAA): ")
+                fecha_final = datetime.strptime(fecha_final, "%m-%d-%Y").date()
                 if fecha_final >= fecha_inicial:
                     break
                 else:
@@ -761,8 +761,8 @@ def reporte_prestamos_por_retornar(prestamos):
 
         for folio, datos in prestamos.items():
             if datos['Retorno'] == 'False':
-                fecha_prestamo = datetime.strptime(datos["Fecha_prestamo"], "%m/%d/%Y").date()
-                fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date()
+                fecha_prestamo = datetime.strptime(datos["Fecha_prestamo"], "%m-%d-%Y").date()
+                fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m-%d-%Y").date()
 
                 if fecha_inicial <= fecha_retorno <= fecha_final:
                     print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
@@ -808,7 +808,7 @@ def export_excel_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno,
     i = 2
     for folio, datos in prestamos.items():
         if not datos["Retorno"]:
-            fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m/%d/%Y").date()
+            fecha_retorno = datetime.strptime(datos["Fecha_retorno"], "%m-%d-%Y").date()
             if fecha_prestamo <= fecha_retorno <= fecha_de_retorno:
                 hoja.cell(row=i, column=1).value = folio
                 hoja.cell(row=i, column=2).value = datos["Clave_unidad"]
@@ -831,7 +831,7 @@ def export_csv_prestamos_retornar(prestamos, fecha_prestamo, fecha_de_retorno, n
         prestamos_filtrados = [
             (folio, datos["Clave_unidad"], datos["Clave_cliente"], datos["Fecha_prestamo"], datos["Fecha_retorno"])
             for folio, datos in prestamos.items()
-            if fecha_prestamo <= datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date() <= fecha_de_retorno
+            if fecha_prestamo <= datetime.strptime(datos['Fecha_prestamo'], "%m-%d-%Y").date() <= fecha_de_retorno
         ]
 
         if prestamos_filtrados:
@@ -846,8 +846,8 @@ def prestamos_por_periodo():
             while True:
                 mostrar_ruta()
                 try:
-                    fecha_inicial = input("\nIngresa la fecha inicial del periodo (MM/DD/AAAA): ")
-                    fecha_inicial = datetime.strptime(fecha_inicial, "%m/%d/%Y").date()
+                    fecha_inicial = input("\nIngresa la fecha inicial del periodo (MM-DD-AAAA): ")
+                    fecha_inicial = datetime.strptime(fecha_inicial, "%m-%d-%Y").date()
                     break
                 except ValueError:
                     print("Formato de fecha incorrecto, intenta de nuevo.")
@@ -856,8 +856,8 @@ def prestamos_por_periodo():
 
             while True:
                 try:
-                    fecha_final = input("Ingresa la fecha final del periodo (MM/DD/AAAA): ")
-                    fecha_final = datetime.strptime(fecha_final, "%m/%d/%Y").date()
+                    fecha_final = input("Ingresa la fecha final del periodo (MM-DD-AAAA): ")
+                    fecha_final = datetime.strptime(fecha_final, "%m-%d-%Y").date()
                     if fecha_final >= fecha_inicial:
                         break
                     else:
@@ -873,7 +873,7 @@ def prestamos_por_periodo():
             print("=" * 80)
 
             for folio, datos in prestamos.items():
-                fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
+                fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m-%d-%Y").date()
                 if fecha_inicial <= fecha_prestamo <= fecha_final:
                     print(f"{folio:^8}{datos['Clave_cliente']: <20}{datos['Clave_unidad']: <20}{datos['Fecha_prestamo']: <20}{datos['Fecha_retorno']}")
 
@@ -923,7 +923,7 @@ def export_excel_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retor
 
     i = 2  # Iniciar en la fila 2 porque la fila 1 son los encabezados
     for folio, datos in prestamos.items():
-        fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date()
+        fecha_prestamo = datetime.strptime(datos['Fecha_prestamo'], "%m-%d-%Y").date()
         if fecha_prestamo <= fecha_prestamo <= fecha_de_retorno:
             # Asignar los valores a las celdas
             hoja.cell(row=i, column=1).value = folio
@@ -955,7 +955,7 @@ def export_csv_prestamos_por_periodo(prestamos, fecha_prestamo, fecha_de_retorno
         prestamos_filtrados = [
             (folio, datos["Clave_unidad"], datos["Clave_cliente"], datos["Fecha_prestamo"], datos["Fecha_retorno"])
             for folio, datos in prestamos.items()
-            if fecha_prestamo <= datetime.strptime(datos['Fecha_prestamo'], "%m/%d/%Y").date() <= fecha_de_retorno
+            if fecha_prestamo <= datetime.strptime(datos['Fecha_prestamo'], "%m-%d-%Y").date() <= fecha_de_retorno
         ]
 
         if prestamos_filtrados:
