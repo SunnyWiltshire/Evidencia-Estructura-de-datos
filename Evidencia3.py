@@ -3,43 +3,45 @@ import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import openpyxl
-from openpyxl import load_workbook
-from openpyxl.styles import Font
+import os
 import pandas as pd
 import sqlite3
+import sys
+from datetime import datetime, timedelta
+from openpyxl import load_workbook
+from openpyxl.styles import Font
 from sqlite3 import Error
 from tabulate import tabulate
-from datetime import datetime, timedelta
-import sys
 
 ruta = []
-try:
-    with sqlite3.connect('RentaBicicletas.db') as conn: 
-        cursor = conn.cursor()
-        cursor.execute("CREATE TABLE IF NOT EXISTS UNIDAD \
-            (Clave INTEGER NOT NULL PRIMARY KEY, \
-            Rodada INTEGER NOT NULL, \
-            Color TEXT NOT NULL);")
-        cursor.execute("CREATE TABLE IF NOT EXISTS CLIENTES \
-            (Clave INTEGER NOT NULL PRIMARY KEY, \
-            Apellidos TEXT NOT NULL, \
-            Nombres TEXT NOT NULL, \
-            Telefono INTEGER NOT NULL);")
-        cursor.execute("CREATE TABLE IF NOT EXISTS PRESTAMO \
-            (Folio INTEGER NOT NULL PRIMARY KEY, \
-            Fecha_Prestamo INTEGER NOT NULL, \
-            Dias_Prestamo INTEGER NOT NULL, \
-            Fecha_Retorno INTEGER NOT NULL, \
-            Retorno INTEGER NOT NULL, \
-            Clave_Cliente INTEGER NOT NULL, \
-            Clave_Unidad INTEGER NOT NULL, \
-            FOREIGN KEY (Clave_Cliente) REFERENCES CLIENTES(Clave), \
-            FOREIGN KEY (Clave_Unidad) REFERENCES UNIDAD(Clave));")
-        print("Base de datos y tablas creadas exitosamente.") 
-except Error as e:
-    print(e)
-except Exception:
-    print(f"Se produjo el siguiente error: {sys.exc_info()}")
+if not os.path.exists('RentaBicicletas.db'):
+    try:
+        with sqlite3.connect('RentaBicicletas.db') as conn: 
+            cursor = conn.cursor()
+            cursor.execute("CREATE TABLE IF NOT EXISTS UNIDAD \
+                (Clave INTEGER NOT NULL PRIMARY KEY, \
+                Rodada INTEGER NOT NULL, \
+                Color TEXT NOT NULL);")
+            cursor.execute("CREATE TABLE IF NOT EXISTS CLIENTES \
+                (Clave INTEGER NOT NULL PRIMARY KEY, \
+                Apellidos TEXT NOT NULL, \
+                Nombres TEXT NOT NULL, \
+                Telefono INTEGER NOT NULL);")
+            cursor.execute("CREATE TABLE IF NOT EXISTS PRESTAMO \
+                (Folio INTEGER NOT NULL PRIMARY KEY, \
+                Fecha_Prestamo INTEGER NOT NULL, \
+                Dias_Prestamo INTEGER NOT NULL, \
+                Fecha_Retorno INTEGER NOT NULL, \
+                Retorno INTEGER NOT NULL, \
+                Clave_Cliente INTEGER NOT NULL, \
+                Clave_Unidad INTEGER NOT NULL, \
+                FOREIGN KEY (Clave_Cliente) REFERENCES CLIENTES(Clave), \
+                FOREIGN KEY (Clave_Unidad) REFERENCES UNIDAD(Clave));")
+            print("Base de datos y tablas creadas exitosamente.") 
+    except Error as e:
+        print(e)
+    except Exception:
+        print(f"Se produjo el siguiente error: {sys.exc_info()}")
     
 def mostrar_ruta():
     print('\nRUTA: ')
@@ -599,8 +601,6 @@ def submenu_reportes():
         if cancelar():
             break
 
-
-
 def submenu_clientes():
     mostrar_ruta()
     while True:
@@ -629,9 +629,6 @@ def submenu_clientes():
             print("Favor de ingresar un valor numérico.")
         except Exception as e:
             print(f"Ocurrió un problema: {e}")
-
-
-
 
 ## SUBMENU REPORTES CLIENTES
 def exportar_clientes():
@@ -710,72 +707,6 @@ def exportar_clientes2():
     
     # Cerrar la conexión con la base de datos
     conexion.close()
-
-
-
-
-def cliente_especificoRESP():
-    try:
-        exportar_clientes2()
-        # Solicitar clave del cliente
-        clave_cliente = input("Introduce la clave del cliente para ver su historial: ")
-        
-        # Verificar que la clave sea un número válido
-        if not clave_cliente.isdigit():
-            print("La clave del cliente debe ser un número.")
-            return
-        
-        clave_cliente = int(clave_cliente)
-
-        # Conectar a la base de datos
-        with sqlite3.connect('RentaBicicletas.db') as conn:
-            cursor = conn.cursor()
-
-            # Obtener detalles del cliente
-            cursor.execute("SELECT Clave, Apellidos, Nombres, Telefono FROM CLIENTES WHERE Clave=?", (clave_cliente,))
-            cliente = cursor.fetchone()
-            
-            if cliente:
-                # Mostrar detalles del cliente en formato tabular
-                print(f"\n--- Detalles del Cliente ---")
-                headers_cliente = ["Clave", "Apellidos", "Nombres", "Teléfono"]
-                cliente_info = [[cliente[0], cliente[1], cliente[2], cliente[3]]]
-                print(tabulate(cliente_info, headers=headers_cliente, tablefmt="rounded_outline"))
-                
-                # Obtener el historial de préstamos del cliente
-                cursor.execute("""
-                    SELECT Folio, Fecha_Prestamo, Dias_Prestamo, Fecha_Retorno, Retorno, Clave_Unidad 
-                    FROM PRESTAMO 
-                    WHERE Clave_Cliente=?
-                    ORDER BY Fecha_Prestamo ASC
-                """, (clave_cliente,))
-                prestamos = cursor.fetchall()
-                
-                # Comprobar si existen préstamos
-                if prestamos:
-                    # Mostrar el historial de préstamos en formato tabular
-                    print("\n--- Historial de Préstamos ---")
-                    headers_prestamos = ["Folio", "Fecha Préstamo", "Días Préstamo", "Fecha Retorno", "Devuelto", "Clave Unidad"]
-                    tabla_prestamos = [
-                        [p[0], 
-                         datetime.strptime(p[1], "%Y-%m-%d").strftime("%d/%m/%Y"), 
-                         p[2], 
-                         datetime.strptime(p[3], "%Y-%m-%d").strftime("%d/%m/%Y"),
-                         "Sí" if p[4] else "No", 
-                         p[5]] 
-                        for p in prestamos
-                    ]
-                    print(tabulate(tabla_prestamos, headers=headers_prestamos, tablefmt="rounded_outline"))
-                else:
-                    print("No se encontraron préstamos para este cliente.")
-            else:
-                print("La clave del cliente no es válida o no existe.")
-                
-    except Error as e:
-        print(f"Error de base de datos: {e}")
-    except Exception as e:
-        print(f"Se produjo el siguiente error: {e}")
-
 
 def cliente_especifico():
     try:
@@ -883,141 +814,6 @@ def exportar_historial_excel(historial, clave_cliente):
 
     workbook.save(filename)
     print(f"Historial exportado exitosamente a {filename} en formato Excel.")
-
-
-
-
-
-
-
-
-def exportar_historial_excel1(historial, clave_cliente):
-    # Crear un DataFrame a partir del historial
-    df = pd.DataFrame(historial, columns=["Folio", "Fecha Préstamo", "Días Préstamo", "Fecha Retorno", "Devuelto", "Clave Unidad"])
-
-    # Convertir las fechas al formato Mes, Día, Año
-    df["Fecha Préstamo"] = pd.to_datetime(df["Fecha Préstamo"]).dt.strftime("%m/%d/%Y")
-    df["Fecha Retorno"] = pd.to_datetime(df["Fecha Retorno"]).dt.strftime("%m/%d/%Y")
-
-    # Exportar a Excel
-    filename = f"historial_cliente_{clave_cliente}.xlsx"
-    df.to_excel(filename, index=False)
-
-    # Ajustar el ancho de las columnas usando la función ajustar_ancho_columnas
-    workbook = load_workbook(filename)
-    worksheet = workbook.active
-    ajustar_ancho_columnas(worksheet)  # Llamada para ajustar las columnas
-
-    # Guardar los cambios
-    workbook.save(filename)
-    print(f"Historial exportado exitosamente a {filename}")
-
-
-def exportar_historial_csv1(historial, clave_cliente):
-    with open(f"historial_cliente_{clave_cliente}.csv", mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(["Folio", "Fecha Préstamo", "Días Préstamo", "Fecha Retorno", "Devuelto", "Clave Unidad"])
-        writer.writerows(historial)
-    print(f"Historial exportado exitosamente a historial_cliente_{clave_cliente}.csv")
-
-def exportar_historial_excel2(historial, clave_cliente):
-    df = pd.DataFrame(historial, columns=["Folio", "Fecha Préstamo", "Días Préstamo", "Fecha Retorno", "Devuelto", "Clave Unidad"])
-    df.to_excel(f"historial_cliente_{clave_cliente}.xlsx", index=False)
-    print(f"Historial exportado exitosamente a historial_cliente_{clave_cliente}.xlsx")
-
-
-def cliente_especifico444():
-    try:
-        exportar_clientes2()
-        
-        # Solicitar clave del cliente
-        clave_cliente = input("Introduce la clave del cliente para ver su historial: ")
-        
-        # Verificar que la clave sea un número válido
-        if not clave_cliente.isdigit():
-            print("La clave del cliente debe ser un número.")
-            return
-        
-        clave_cliente = int(clave_cliente)
-
-        # Conectar a la base de datos
-        with sqlite3.connect('RentaBicicletas.db') as conn:
-            cursor = conn.cursor()
-
-            # Obtener detalles del cliente
-            cursor.execute("SELECT Clave, Apellidos, Nombres, Telefono FROM CLIENTES WHERE Clave=?", (clave_cliente,))
-            cliente = cursor.fetchone()
-            
-            if cliente:
-                # Mostrar detalles del cliente en formato tabular
-                print(f"\n--- Detalles del Cliente ---")
-                headers_cliente = ["Clave", "Apellidos", "Nombres", "Teléfono"]
-                cliente_info = [[cliente[0], cliente[1], cliente[2], cliente[3]]]
-                print(tabulate(cliente_info, headers=headers_cliente, tablefmt="rounded_outline"))
-                
-                # Obtener el historial de préstamos del cliente
-                cursor.execute("""
-                    SELECT Folio, Fecha_Prestamo, Dias_Prestamo, Fecha_Retorno, Retorno, Clave_Unidad 
-                    FROM PRESTAMO 
-                    WHERE Clave_Cliente=?
-                    ORDER BY Fecha_Prestamo ASC
-                """, (clave_cliente,))
-                prestamos = cursor.fetchall()
-                
-                # Comprobar si existen préstamos
-                if prestamos:
-                    # Formatear las fechas y mostrar el historial de préstamos en formato tabular
-                    print("\n--- Historial de Préstamos ---")
-                    headers_prestamos = ["Folio", "Fecha Préstamo", "Días Préstamo", "Fecha de Compromiso de Retorno", "Devuelto", "Clave Unidad"]
-                    tabla_prestamos = [
-                        [p[0], 
-                         datetime.strptime(p[1], "%Y-%m-%d").strftime("%d/%m/%Y"), 
-                         p[2], 
-                         datetime.strptime(p[3], "%Y-%m-%d").strftime("%d/%m/%Y") if p[3] else "No retornado",
-                         "Sí" if p[4] else "No", 
-                         p[5]] 
-                        for p in prestamos
-                    ]
-                    print(tabulate(tabla_prestamos, headers=headers_prestamos, tablefmt="rounded_outline"))
-
-                    # Opciones de exportación
-                    while True:
-                        try:
-                            export_opcion = int(input("\n¿Deseas exportar el historial? \n1: CSV\n2: Excel\n3: Ambos\n4: No exportar\nElige una opción: "))
-                            
-                            if export_opcion == 1:
-                                exportar_historial_csv(prestamos, clave_cliente)
-                                break
-                            elif export_opcion == 2:
-                                exportar_historial_excel(prestamos, clave_cliente)
-                                break
-                            elif export_opcion == 3:
-                                exportar_historial_csv(prestamos, clave_cliente)
-                                exportar_historial_excel(prestamos, clave_cliente)
-                                break
-                            elif export_opcion == 4:
-                                print("No se realizó exportación.")
-                                break
-                            else:
-                                print("Opción no válida. Por favor, selecciona una opción de exportación válida.")
-                        except ValueError:
-                            print("Error: Debes ingresar un número entero que sea válido.")
-                        except Exception as e:
-                            print(f"Se produjo un error: {e}")
-                else:
-                    print("No se encontraron préstamos para este cliente.")
-            else:
-                print("La clave del cliente no es válida o no existe.")
-                
-    except Error as e:
-        print(f"Error de base de datos: {e}")
-    except Exception as e:
-        print(f"Se produjo el siguiente error: {e}")
-
-
-
-
-
 
 def listado_rodada():
     mostrar_ruta()
@@ -2149,52 +1945,6 @@ def prestamos_por_dia_semana():
     except Exception as e:
         print(f"Se produjo el siguiente error: {e}")
 
-def export_cliente_especifico_excel(clave_cliente, name_excel = "cliente_especifico.xlsx"): 
-    try:
-        with sqlite3.connect('RentaBicicletas.db') as conn:
-            cursor = conn.cursor()
-            cursor.execute("""SELECT Folio, Fecha_Prestamo, Dias_Prestamo, Fecha_Retorno, Retorno, Clave_Unidad 
-                    FROM PRESTAMO 
-                    WHERE Clave_Cliente=?
-                    ORDER BY Fecha_Prestamo ASC
-                """, (clave_cliente,))
-            prestamos  = cursor.fetchall()
-            
-            libro = openpyxl.Workbook()
-            hoja = libro.active
-            hoja.title = "Cliente_especifico"
-            
-            # Encabezados
-            hoja["A1"].value = "Folio"
-            hoja["B1"].value = "Fecha_Prestamo"
-            hoja["C1"].value = "Dias_Prestamo"
-            hoja["D1"].value = "Fecha_retorno"
-            hoja["E1"].value = "Retorno"
-            hoja["F1"].value = "Clave_Unidad"
-
-
-            # Estilos en los encabezados
-            hoja["A1"].font = Font(bold=True)
-            hoja["B1"].font = Font(bold=True)
-            hoja["C1"].font = Font(bold=True)
-            hoja["D1"].font = Font(bold=True)
-            hoja["E1"].font = Font(bold=True)
-            hoja["F1"].font = Font(bold=True)
-
-            for i, (Folio, Fecha_prestamo, Dias_Prestamo, Fecha_retorno, Retorno, Clave_Unidad ) in enumerate(prestamos, start=2):
-                hoja.cell(row=i, column=1).value = Folio
-                hoja.cell(row=i, column=2).value = Fecha_prestamo
-                hoja.cell(row=i, column=3).value = Dias_Prestamo
-                hoja.cell(row=i, column=4).value = Fecha_retorno
-                hoja.cell(row=i, column=5).value = Retorno
-                hoja.cell(row=i, column=6).value = Clave_Unidad
-                
-            ajustar_ancho_columnas(hoja)
-            libro.save(name_excel)
-            print(f"Datos exportados con éxito en {name_excel}")
-    except sqlite3.Error as e:
-        print(f"Error al exportar a Excel: {e}")
-        raise
     
 # Inicio del programa
 clientes = import_clientes()
